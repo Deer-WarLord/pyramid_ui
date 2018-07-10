@@ -1,0 +1,45 @@
+<td><%- aggregator %></td>
+<td><%- uniques %></td>
+<td><%- views %></td>
+<td><%- income_groups %></td>
+<td>
+    <table class="social-demo-item">
+        <% _.mapObject(getAgesGroup(age_groups), function(val, key) { %>
+            <tr data-role="<%- key %>" data-index="<%- val %>">
+                <td><span class="badge element-bg-color-blue"><%- key %></span></td>
+                <td><span class="badge element-bg-color-seagreen"><%- val %></span></td>
+            </tr>
+        <% }) %>
+    </table>
+</td>
+<td>
+    <table class="social-demo-item">
+        <% _.mapObject(getGendersGroup(gender_groups), function(val, key) { %>
+        <tr data-role="<%- key %>" data-index="<%- val %>">
+            <td><span class="badge element-bg-color-blue"><%- key %></span></td>
+            <td><span class="badge element-bg-color-seagreen"><%- val %></span></td>
+        </tr>
+        <% }) %>
+    </table>
+</td>
+<td><%- regions %></td>
+<td>
+    <table class="social-demo-item">
+        <% _.mapObject(getPlatformsGroup(platforms), function(val, key) { %>
+        <tr data-role="<%- key %>" data-index="<%- val %>">
+            <td><span class="badge element-bg-color-blue"><%- key %></span></td>
+            <td><span class="badge element-bg-color-seagreen"><%- val %></span></td>
+        </tr>
+        <% }) %>
+    </table>
+</td>
+<td>
+    <table class="social-demo-item">
+        <% _.mapObject(getBrowsersGroup(browsers), function(val, key) { %>
+        <tr data-role="<%- key %>" data-index="<%- val %>">
+            <td><span class="badge element-bg-color-blue"><%- key %></span></td>
+            <td><span class="badge element-bg-color-seagreen"><%- val %></span></td>
+        </tr>
+        <% }) %>
+    </table>
+</td>

@@ -1,0 +1,39 @@
+<div class="clearfix">
+    <a href="#" class="pull-left toggle-sidebar-collapse"><i class="fa fa-bars"></i></a>
+    <div class="pull-left left logo">
+        <a href="#"><img height="25px" src="<%- logoUrl %>" alt="Analytics - User Dashboard" /></a>
+        <h1 class="sr-only">Analytics User Dashboard</h1>
+    </div>
+    <div class="pull-right right">
+        <div class="top-bar-right">
+            <div class="logged-user">
+                <div class="btn-group">
+                    <a href="#" class="btn btn-link dropdown-toggle" data-toggle="dropdown">
+                        <img src="<%- avatarUrl %>" alt="User Avatar" />
+                        <span class="name"><%- username %></span> <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu" role="menu">
+                        <!--<li>-->
+                        <!--<a href="#">-->
+                        <!--<i class="fa fa-user"></i>-->
+                        <!--<span class="text">Profile</span>-->
+                        <!--</a>-->
+                        <!--</li>-->
+                        <!--<li>-->
+                        <!--<a href="#">-->
+                        <!--<i class="fa fa-cog"></i>-->
+                        <!--<span class="text">Settings</span>-->
+                        <!--</a>-->
+                        <!--</li>-->
+                        <li>
+                            <a href="<%- logoutUrl %>">
+                                <i class="fa fa-power-off"></i>
+                                <span class="text">Выход</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

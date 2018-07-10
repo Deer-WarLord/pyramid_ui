@@ -1,0 +1,41 @@
+<div class="pull-right col-sm-6">
+    <div class="dataTables_paginate paging_simple_numbers">
+        <ul class="pagination">
+            <% if (page_active > 1) { %>
+                <li class="paginate_button previous">
+                    <a tabindex="<%= page_active-1 %>" href="#">Previous</a>
+                </li>
+            <% } %>
+
+            <% if (left_dots) {%>
+                <li class="paginate_button">
+                    <a tabindex="1" href="#">1</a>
+                </li>
+                <li class="paginate_button disabled">
+                    <a href="#">...</a>
+                </li>
+            <% } %>
+
+            <% for (var i = nav_begin; i <= nav_end; i++) { %>
+                <li <% if (page_active == i) {print('class="paginate_button active"')} else {print('class="paginate_button"')} %>>
+                    <a tabindex="<%= i %>" href="#"><%= i %></a>
+                </li>
+            <% } %>
+
+            <% if (right_dots) {%>
+                <li class="paginate_button disabled">
+                    <a href="#">...</a>
+                </li>
+                <li class="paginate_button">
+                    <a tabindex="<%= page_count %>" href="#"><%= page_count %></a>
+                </li>
+            <% } %>
+
+            <% if (page_active < page_count) { %>
+                <li class="paginate_button next">
+                    <a tabindex="<%= page_active+1 %>" href="$">Next</a>
+                </li>
+            <% } %>
+        </ul>
+    </div>
+</div>

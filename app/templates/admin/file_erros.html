@@ -1,0 +1,10 @@
+<li class="parsley-required">
+<% _.each(items, function(element, index, list) { %>
+    <p><span>For element number <%- index %>:</span><br/>
+        <% _.mapObject(element, function(val, key) { %>
+            <span><%- key %>:</span>
+            <span><%- val %></span><br/>
+        <% }) %>
+    </p>
+<% }) %>
+</li>

@@ -1,0 +1,47 @@
+<div class="widget widget-table">
+    <div class="widget-header">
+        <h3><i class="fa fa-table"></i> Публикации без ключей</h3>
+        <div class="btn-group widget-header-toolbar">
+            <a href="#" title="Expand/Collapse" class="btn-borderless btn-toggle-expand"><i class="fa fa-chevron-up"></i></a>
+        </div>
+    </div>
+    <div class="widget-content">
+
+        <div class="warning-block hidden">
+            <div class="alert alert-warning alert-dismissable">
+                <i class="fa fa-exclamation-circle"></i> Количество буликаций без ключей <span id="publication-count"></span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-3">
+                <button id="get-keys" type="button" class="btn btn-primary disabled"><i class="fa fa-refresh"></i> Получить ключи из Шукача</button>
+            </div>
+        </div>
+
+        <table id="datatable-publication-without-keys" class="table table-sorting table-hover table-bordered datatable">
+            <thead>
+            <tr class="row-filter">
+                <th data-index="0"><input type="text" class="form-control input-sm" placeholder="Search..."></th>
+                <th data-index="1"><input type="text" class="form-control input-sm" placeholder="Search..."></th>
+                <th data-index="2"><input type="text" class="form-control input-sm" placeholder="Search..."></th>
+                <th data-index="3"><input type="text" class="form-control input-sm" placeholder="Search..."></th>
+                <th data-index="4"><input type="text" class="form-control input-sm" placeholder="Search..."></th>
+                <th data-index="5"></th>
+            </tr>
+            <tr>
+                <th>Заголовок источника</th>
+                <th>ID</th>
+                <th>Тема/Компании</th>
+                <th>СМИ</th>
+                <th>URL</th>
+                <th>Дата публикации</th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <div class="row paginator"></div>
+    </div>
+</div>
+

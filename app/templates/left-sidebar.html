@@ -1,0 +1,95 @@
+<nav class="main-nav">
+    <ul class="main-menu">
+        <li class="active">
+            <a href="#" class="js-sub-menu-toggle">
+                <i class="fa fa-columns fw"></i>
+                <span class="text">Запросы</span>
+                <i class="toggle-icon fa fa-angle-down"></i>
+            </a>
+            <ul class="sub-menu open">
+                <% if (permissions.theme) { %>
+                    <li class="active">
+                        <a id="markets-query" href="#">
+                            <span class="text">По рынкам</span>
+                        </a>
+                    </li>
+                <% } %>
+
+                <% if (permissions.publication) { %>
+                    <li <% if (!permissions.theme) { %> class="active" <% } %>>
+                        <a id="publications-query" href="#">
+                            <span class="text">По СМИ</span>
+                        </a>
+                    </li>
+                <% } %>
+
+                <% if (permissions.social_demo) { %>
+                    <li id="social-demo-sub-menu">
+                        <a class="js-sub-menu-toggle" href="#">
+                            <span class="text">По Соц. дем. профилю</span>
+                            <i class="toggle-icon fa fa-angle-left"></i>
+                        </a>
+                        <ul class="sub-menu" style="display: none;">
+                            <li id="admixer-sub-sub-menu">
+                                <a class="js-sub-menu-toggle" href="#">
+                                    <span class="text">Admixer</span>
+                                    <i class="toggle-icon fa fa-angle-left"></i>
+                                </a>
+                                <ul class="sub-menu" style="display: none;">
+                                    <% if (permissions.publication) { %>
+                                        <li>
+                                            <a id="publications-social-demo-query-admixer" href="#">СМИ</a>
+                                        </li>
+                                    <% } %>
+                                    <% if (permissions.theme) { %>
+                                        <li>
+                                            <a id="themes-social-demo-query-admixer" href="#">Темы/Компании</a>
+                                        </li>
+                                    <% } %>
+                                </ul>
+                            </li>
+                            <li id="fg-sub-sub-menu">
+                                <a class="js-sub-menu-toggle" href="#">
+                                    <span class="text">Factrum Group</span>
+                                    <i class="toggle-icon fa fa-angle-left"></i>
+                                </a>
+                                <ul class="sub-menu" style="display: none;">
+                                    <% if (permissions.publication) { %>
+                                        <li>
+                                            <a id="publications-social-demo-query-fg" href="#">СМИ</a>
+                                        </li>
+                                    <% } %>
+                                    <% if (permissions.theme) { %>
+                                        <li>
+                                            <a id="themes-social-demo-query-fg" href="#">Темы/Компании</a>
+                                        </li>
+                                    <% } %>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                <% } %>
+            </ul>
+        </li>
+        <li>
+            <a href="#"><i class="fa fa-bar-chart-o fw"></i><span class="text">Графики</span></a>
+        </li>
+
+        <% if (permissions.admin) { %>
+            <li id="admin-menu">
+                <a href="#" class="js-sub-menu-toggle">
+                    <i class="fa fa-gears fa-fw"></i>
+                    <span class="text">Администрирование</span>
+                    <i class="toggle-icon fa fa-angle-left"></i>
+                </a>
+                <ul class="sub-menu">
+                    <li><a id="admin-data-upload" href="#"><span class="text">Загрузка данных</span></a></li>
+                    <li><a href="/admin/uploaders/user/"><span class="text">Пользователи и Роли</span></a></li>
+                    <li><a id="admin-keys-update" href="#"><span class="text">Обновление ключей</span></a></li>
+                    <li><a id="admin-files" href="#"><span class="text">Файлы</span></a></li>
+                </ul>
+            </li>
+        <% } %>
+
+    </ul>
+</nav>
