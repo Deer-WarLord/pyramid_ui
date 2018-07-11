@@ -118,7 +118,7 @@ var Table = Marionette.CompositeView.extend({
     },
 
     dispatcher: function(domEvent) {
-        var market = domEvent.toElement.innerHTML;
+        var market = this.$(domEvent.toElement).data("storeId");
         if (this.model.get('posted_date__gte') && this.model.get('posted_date__lte')) {
             this.model.set("page", 1);
             this.model.set("market", market);
@@ -126,8 +126,7 @@ var Table = Marionette.CompositeView.extend({
             this.model.set('history', 'theme-company-rating/' + this.model.get("market") + "/" +
                                                                 this.model.get('posted_date__gte') + "/" +
                                                                 this.model.get('posted_date__lte'));
-            this.triggerMethod('show');
-
+            this.triggerMethod('show:theme');
         }
     }
 

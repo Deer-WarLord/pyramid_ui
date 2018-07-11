@@ -44,8 +44,9 @@ module.exports = Marionette.LayoutView.extend({
     },
 
     childEvents: {
-        'show:markets': 'onShowMarket',
+        'show:market': 'onShowMarket',
         'show:theme': 'onShowTheme',
+        'show:theme:dates': 'onShowThemeDates',
         'show:publications': 'onShowPublications',
         'query:change': 'onQueryChange',
         'specific:show:social:demo:admixer': 'onSpecificShowSocialDemoAdmixer',
@@ -96,6 +97,22 @@ module.exports = Marionette.LayoutView.extend({
         }
     },
 
+    onShowMarketDates: function(dates) {
+        if (this.initialData.permissions.theme && this.initialData.permissions.free_time) {
+            this.model.set({
+                "posted_date__gte": dates[0],
+                "posted_date__lte": dates[1]
+            });
+            this.showBars();
+            this.left_sidebar.currentView.activateMarketsQuery();
+            this.showChildView('market_rating_table', new MarketRating({
+                model: this.model,
+                permissions: this.initialData.permissions,
+                fixed_dates: this.initialData.dates
+            }), dates);
+        }
+    },
+
     onShowTheme: function() {
         this.showBars();
         if (this.initialData.permissions.theme) {
@@ -117,11 +134,12 @@ module.exports = Marionette.LayoutView.extend({
         }
     },
 
-    onShowDates: function(dates) {
+    onShowThemeDates: function(data) {
         if (this.initialData.permissions.theme && this.initialData.permissions.free_time) {
             this.model.set({
-                "posted_date__gte": dates[0],
-                "posted_date__lte": dates[1],
+                "posted_date__gte": data[0],
+                "posted_date__lte": data[1],
+                "market": data[2]
             });
             this.showBars();
             this.left_sidebar.currentView.activateMarketsQuery();
@@ -129,7 +147,7 @@ module.exports = Marionette.LayoutView.extend({
                 model: this.model,
                 permissions: this.initialData.permissions,
                 fixed_dates: this.initialData.dates
-            }), dates);
+            }), data);
         }
     },
 

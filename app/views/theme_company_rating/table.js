@@ -100,6 +100,9 @@ var Table = Marionette.CompositeView.extend({
 
         this.collection.fetch({
             success: function() {
+                if (self.history) {
+                    Backbone.history.navigate(self.history);
+                }
                 setTimeout(function() {
                     self.triggerMethod('fetched');
                     if (!self.options.permissions.publication && self.options.permissions.social_demo) {

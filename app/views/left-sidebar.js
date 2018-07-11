@@ -70,8 +70,8 @@ module.exports = Marionette.ItemView.extend({
 
     marketsQuery: function () {
         this.model.clear();
-        this.model.set("history", "theme-company-rating/");
-        this.triggerMethod('show:markets');
+        this.model.set("history", "market-rating/");
+        this.triggerMethod('show:market');
     },
 
     activatePublicationsQuery: function () {

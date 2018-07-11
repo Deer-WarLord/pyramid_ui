@@ -44,13 +44,13 @@ module.exports = Marionette.Controller.extend({
 
     themeCompanyRatingAll: function() {
         if (this.permissions.theme) {
-            this.getOption('layout').triggerMethod('show');
+            this.getOption('layout').triggerMethod('show:theme');
         }
     },
     
-    themeCompanyRatingFilter: function(fromDate, toDate) {
+    themeCompanyRatingFilter: function(market, fromDate, toDate) {
         if (this.permissions.theme) {
-            this.getOption('layout').triggerMethod('show:dates', [fromDate, toDate]);
+            this.getOption('layout').triggerMethod('show:theme:dates', [fromDate, toDate, market]);
         }
     },
     

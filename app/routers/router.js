@@ -11,7 +11,7 @@ module.exports = Marionette.AppRouter.extend({
         'market-rating/:fromDate/:toDate': 'marketRatingFilter',
 
         'theme-company-rating/': 'themeCompanyRatingAll',
-        'theme-company-rating/:fromDate/:toDate': 'themeCompanyRatingFilter',
+        'theme-company-rating/:market/:fromDate/:toDate': 'themeCompanyRatingFilter',
 
         'publication-rating/': 'publicationRatingAll',
         'publication-rating/:fromDate/:toDate(/:key_word)': 'publicationRatingFilter',
