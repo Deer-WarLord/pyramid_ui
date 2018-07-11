@@ -62,7 +62,7 @@ var Table = Marionette.CompositeView.extend({
 
     events: {
         'keyup @ui.rowFilter': 'filterColumn',
-        'click @ui.key_word': 'dispatcher',
+        'click @ui.market': 'dispatcher',
         'change @ui.input': 'filterCollection'
     },
 
@@ -123,10 +123,10 @@ var Table = Marionette.CompositeView.extend({
             this.model.set("page", 1);
             this.model.set("market", market);
 
-            if (this.ui.selectQuery.val() === "market") {
-                this.model.set('history', 'theme-company-rating/' + this.model.get('posted_date__gte') + "/" + this.model.get('posted_date__lte') + "/" + this.model.get("market"));
-                this.triggerMethod('show:publications');
-            }
+            this.model.set('history', 'theme-company-rating/' + this.model.get("market") + "/" +
+                                                                this.model.get('posted_date__gte') + "/" +
+                                                                this.model.get('posted_date__lte'));
+            this.triggerMethod('show');
 
         }
     }

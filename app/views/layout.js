@@ -45,6 +45,7 @@ module.exports = Marionette.LayoutView.extend({
 
     childEvents: {
         'show:markets': 'onShowMarket',
+        'show:theme': 'onShowTheme',
         'show:publications': 'onShowPublications',
         'query:change': 'onQueryChange',
         'specific:show:social:demo:admixer': 'onSpecificShowSocialDemoAdmixer',
@@ -95,7 +96,7 @@ module.exports = Marionette.LayoutView.extend({
         }
     },
 
-    onShow: function() {
+    onShowTheme: function() {
         this.showBars();
         if (this.initialData.permissions.theme) {
             this.left_sidebar.currentView.activateMarketsQuery();
