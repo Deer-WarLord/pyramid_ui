@@ -28,7 +28,8 @@ module.exports = Marionette.CompositeView.extend({
         "table": "#datatable-publication-without-keys",
         "rowFilter": "#datatable-publication-without-keys .row-filter input",
         "warning_block": ".warning-block",
-        "get_keys_button": "#get-keys"
+        "get_keys_button": "#get-keys",
+        "get_collection_button": "#get-collection"
     },
 
     behaviors: {
@@ -37,37 +38,29 @@ module.exports = Marionette.CompositeView.extend({
                 "DataTable": {
                     bDestroy: true,
                     "order": [[ 1, "desc" ]],
-                    sDom: "t",
+                    sDom: "t"
                 }
             }
         },
-        ToggleBehavior: {},
+        ToggleBehavior: {}
     },
 
     events: {
         'keyup @ui.rowFilter': 'filterColumn',
         'click @ui.get_keys_button': 'getKeys',
+        'click @ui.get_collection_button': 'getCollection'
     },
 
     onShow: function(child, construcotr, dates) {
         var self = this;
-        this.collection.fetch({
-            success: function() {
-
-                if (self.collection.state.totalRecords > 0) {
-                    $(self.ui.warning_block).removeClass("hidden");
-                    $("#publication-count").html(self.collection.state.totalRecords);
-                    $(self.ui.get_keys_button).removeClass("disabled");
-                }
-
-                if (self.history) {
-                    Backbone.history.navigate(self.history);
-                }
-                setTimeout(function() {
-                    self.triggerMethod('fetched');
-                }, 1000);
+        $.get("/noksfishes/publications-without-keys-count/", function(data) {
+            if (data > 0) {
+                $(self.ui.warning_block).removeClass("hidden");
+                $("#publication-count").html(data);
+                $(self.ui.get_keys_button).removeClass("disabled");
             }
         });
+
     },
 
     filterColumn: function (event) {
@@ -82,9 +75,22 @@ module.exports = Marionette.CompositeView.extend({
         //TODO Loader
         var self = this;
         $.get("/noksfishes/get-keys/", function(data) {
-            alert("Обновленно ключей: " + data);
+            alert("Обновленно ключей займет какое-то время");
             self.onShow();
         });
     },
+
+    getCollection: function () {
+        this.collection.fetch({
+            success: function() {
+                if (self.history) {
+                    Backbone.history.navigate(self.history);
+                }
+                setTimeout(function() {
+                    self.triggerMethod('fetched');
+                }, 1000);
+            }
+        });
+    }
 
 });
