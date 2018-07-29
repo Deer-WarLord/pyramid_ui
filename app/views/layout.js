@@ -7,6 +7,7 @@ var ThemeCompanyRating = require('./theme_company_rating/table');
 var PublicationRating = require('./publication_rating/table');
 var SocialDemoRatingAdmixer = require('./social_demo_rating/table_admixer');
 var SocialDemoRatingFG = require('./social_demo_rating/table_fg');
+var KeywordChart = require('./charts/keyword-chart');
 
 var AdminDataUploader = require('./admin/DataUploader');
 var AdminUserRoles = require('./admin/UserRoles');
@@ -37,6 +38,7 @@ module.exports = Marionette.LayoutView.extend({
         general_social_demo_rating_table: '#general-social-demo-rating-table',
         themes_social_demo_rating_table: '#themes-social-demo-rating',
         publications_social_demo_rating_table: '#publications-social-demo-rating',
+        keyword_chart: "#keyword-charts-region",
         admin_data_uploader: '#admin-data-uploader-region',
         admin_user_roles: '#admin-user-roles-region',
         admin_keys_update: '#admin-keys-update-region',
@@ -54,6 +56,8 @@ module.exports = Marionette.LayoutView.extend({
 
         'general:show:social:demo:admixer': 'onGeneralShowSocialDemoAdmixer',
         'general:show:social:demo:fg': 'onGeneralShowSocialDemoFg',
+
+        'show:chart:keyword': 'onShowChartKeyword',
 
         'show:admin:data:uploader': 'onShowAdminDataUploader',
         'show:admin:user:roles': 'onShowAdminUserRoles',
@@ -251,6 +255,18 @@ module.exports = Marionette.LayoutView.extend({
             this.showChildView('general_social_demo_rating_table', new SocialDemoRatingFG({
                 model: this.model,
                 url: url,
+                permissions: this.initialData.permissions,
+                fixed_dates: this.initialData.dates
+            }));
+        }
+    },
+
+    onShowChartKeyword: function () {
+        if (this.initialData.permissions.theme) {
+            this.showBars();
+            this.$(this.regions.keyword_chart).show();
+            this.showChildView('keyword_chart', new KeywordChart({
+                model: this.model,
                 permissions: this.initialData.permissions,
                 fixed_dates: this.initialData.dates
             }));

@@ -71,8 +71,15 @@
                 <% } %>
             </ul>
         </li>
-        <li>
-            <a href="#"><i class="fa fa-bar-chart-o fw"></i><span class="text">Графики</span></a>
+        <li id="charts">
+            <a href="#" class="js-sub-menu-toggle">
+                <i class="fa fa-bar-chart-o fw"></i>
+                <span class="text">Графики</span>
+                <i class="toggle-icon fa fa-angle-left"></i>
+            </a>
+            <ul class="sub-menu">
+                <li><a id="keyword-chart" href="#"><span class="text">Темы/Компании/Спикеры</span></a></li>
+            </ul>
         </li>
 
         <% if (permissions.admin) { %>

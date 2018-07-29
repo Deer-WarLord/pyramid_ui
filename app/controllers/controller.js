@@ -4,6 +4,7 @@ var jqueryParam = require('jquery-param');
 
 var DatePickerBehavior = require('../behaviors/datepicker-behavior');
 var jQueryBehavior = require('../behaviors/jquery-behavior');
+var jQueryBehaviorOnFetch = require('../behaviors/jquery-behavior-onfetch');
 var TableBehavior = require('../behaviors/table-behavior');
 var ToggleBehavior = require('../behaviors/toggle-behavior');
 var PlotBehavior = require('../behaviors/plot-behavior');
@@ -13,6 +14,7 @@ Marionette.Behaviors.behaviorsLookup = function() {
         "DatePickerBehavior": DatePickerBehavior,
         "PlotBehavior": PlotBehavior,
         "jQueryBehavior": jQueryBehavior,
+        "jQueryBehaviorOnFetch": jQueryBehaviorOnFetch,
         "ToggleBehavior": ToggleBehavior,
         "TableBehavior": TableBehavior
     };
@@ -188,6 +190,20 @@ module.exports = Marionette.Controller.extend({
             this.getOption('layout').left_sidebar.currentView.expandMenu($('#social-demo-sub-menu'));
             this.getOption('layout').left_sidebar.currentView.expandMenu($('#fg-sub-sub-menu'));
             this.getOption('layout').left_sidebar.currentView.activatePublicationsSocialDemoQueryFg();
+        }
+    },
+
+    chartKeyword: function (fromDate, toDate) {
+        if (this.permissions.theme) {
+            if (fromDate && toDate) {
+                this.getOption('layout').model.set({
+                    "posted_date__gte": fromDate,
+                    "posted_date__lte": toDate
+                });
+            }
+            this.getOption('layout').onShowChartKeyword();
+            this.getOption('layout').left_sidebar.currentView.expandMenu($('#charts'));
+            this.getOption('layout').left_sidebar.currentView.activateKeywordChart();
         }
     },
 

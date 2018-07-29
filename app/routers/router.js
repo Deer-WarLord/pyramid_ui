@@ -27,6 +27,8 @@ module.exports = Marionette.AppRouter.extend({
         'general-social-demo-rating-by-theme-fg(/:fromDate/:toDate)': 'generalSocialDemoRatingThemeAggregatorFG',
         'general-social-demo-rating-by-publication-fg(/:fromDate/:toDate)': 'generalSocialDemoRatingPublicationAggregatorFG',
 
+        'chart-keyword/': "chartKeyword",
+
         'admin-data-uploader': 'admin_data_uploader',
         'admin-user-roles': 'admin_user_roles',
         'admin-keys-update': 'admin_keys_update',

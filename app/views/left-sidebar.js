@@ -21,6 +21,7 @@ module.exports = Marionette.ItemView.extend({
         "themes_social_demo_query_admixer": "#themes-social-demo-query-admixer",
         "publications_social_demo_query_fg": "#publications-social-demo-query-fg",
         "themes_social_demo_query_fg": "#themes-social-demo-query-fg",
+        "keyword_chart": "#keyword-chart",
         "admin_data_upload": "#admin-data-upload",
         "admin_user_roles": "#admin-user-roles",
         "admin_keys_update": "#admin-keys-update",
@@ -35,10 +36,11 @@ module.exports = Marionette.ItemView.extend({
         'click @ui.themes_social_demo_query_admixer': 'themesSocialDemoQueryAdmixer',
         'click @ui.publications_social_demo_query_fg': 'publicationsSocialDemoQueryFg',
         'click @ui.themes_social_demo_query_fg': 'themesSocialDemoQueryFg',
+        'click @ui.keyword_chart': 'keywordChart',
         'click @ui.admin_data_upload': 'showDataUploader',
         'click @ui.admin_user_roles': 'showUserRoles',
         'click @ui.admin_keys_update': 'showKeysUpdate',
-        'click @ui.admin_files': 'showAdminFiles',
+        'click @ui.admin_files': 'showAdminFiles'
 
     },
 
@@ -131,6 +133,18 @@ module.exports = Marionette.ItemView.extend({
         this.model.clear();
         this.model.set("history", "general-social-demo-rating-by-theme-fg");
         this.triggerMethod('general:show:social:demo:fg', "key_word");
+    },
+
+    activateKeywordChart: function () {
+        this.ui.main_menu.find("li.active").removeClass("active");
+        this.ui.keyword_chart.parents("li").addClass("active");
+    },
+
+    keywordChart: function () {
+        this.activateKeywordChart();
+        this.model.clear();
+        this.model.set("history", "chart-keyword");
+        this.triggerMethod('show:chart:keyword');
     },
 
     activateShowDataUploader: function () {
