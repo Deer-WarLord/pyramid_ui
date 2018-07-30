@@ -1,1 +1,3 @@
-<%- title %>
+<% for(var i in keywords) { %>
+<option value="<%= keywords[i] %>"><%= keywords[i] %></option>
+<% } %>

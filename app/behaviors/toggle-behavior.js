@@ -3,8 +3,7 @@ var Marionette = require('backbone.marionette');
 module.exports = Marionette.Behavior.extend({
 
     ui: {
-        "wrapper": ".widget .btn-toggle-expand",
-        "affectedElement": ".widget-content"
+        "wrapper": ".widget .btn-toggle-expand"
     },
 
     events: {
@@ -13,17 +12,14 @@ module.exports = Marionette.Behavior.extend({
 
     clickToggle: function(e) {
         e.preventDefault();
-        var self = event.currentTarget;
-        var affectedElement = this.ui.affectedElement;
+        var affectedElement = this.$(e.currentTarget).parents(".widget").children(".widget-content");
 
-        if (this.clicked) {
-            this.clicked = false;
+        if (!affectedElement.is(":visible")) {
             affectedElement.slideDown(300);
         } else {
-            this.clicked = true;
             affectedElement.slideUp(300);
         }
 
-        $(self).find('i.fa-chevron-up').toggleClass('fa-chevron-down');
-    },
+        this.$(e.currentTarget).children('i.fa-chevron-up').toggleClass('fa-chevron-down');
+    }
 });

@@ -9,9 +9,9 @@ var Themes = Backbone.Collection.extend({
 
 var ThemeItem = Marionette.ItemView.extend({
     initialize: function() {
-        this.$el.attr("value", this.model.get("title"));
+        this.$el.attr("label", this.model.get("market"));
     },
-    tagName: "option",
+    tagName: "optgroup",
     template: require('../../templates/theme_item.html')
 });
 
@@ -37,8 +37,9 @@ module.exports = Marionette.CompositeView.extend({
         "dynamicChart": "#demo-vertical-bar-chart",
         "donutChart": "#demo-donut-chart",
         "reportRange": "#time-range",
+        "input": "#time-range input",
         "themesList": "#themes-list",
-        "input": "#theme-list-query"
+        "inputThemeList": "#theme-list-query"
     },
 
     behaviors: {
@@ -47,8 +48,8 @@ module.exports = Marionette.CompositeView.extend({
                 'multiselect': {
                     maxHeight: 300,
                     enableFiltering: true,
-                    enableCaseInsensitiveFiltering: true,
-                    buttonClass: 'btn btn-default themesList',
+                    buttonClass: 'btn btn-default btn-sm themesList',
+                    nonSelectedText: 'Выберите тему',
                     onChange : function(option, checked) {
                         this.$select.parent().children("#theme-list-query").trigger("change", [option.val(), checked]);
                     }
@@ -60,7 +61,8 @@ module.exports = Marionette.CompositeView.extend({
     },
 
     events: {
-        'change @ui.input': 'filterCollection'
+        'change @ui.inputThemeList': 'filterCollection',
+        'change @ui.input': 'filterCollectionDates'
     },
 
     filterCollection: function(event, val, isTrue) {
@@ -72,6 +74,21 @@ module.exports = Marionette.CompositeView.extend({
         }
         this.model.set("key_word__in", JSON.stringify(keywords));
         this.query();
+    },
+
+    filterCollectionDates: function(event, data) {
+        if (!this.options.permissions.free_time) return;
+
+        var self = this;
+        if (data.fromDate && data.toDate) {
+            self.model.set({
+                "posted_date__gte": data.fromDate,
+                "posted_date__lte": data.toDate
+            });
+            this.query();
+        } else {
+            console.log("Some value is empty!");
+        }
     },
 
     query: function() {
@@ -145,7 +162,7 @@ module.exports = Marionette.CompositeView.extend({
         var config = {
             bars: {
                 show: true,
-                barWidth: 2,
+                barWidth: 4,
                 fill: true,
                 order: true,
                 lineWidth: 4,
@@ -156,7 +173,6 @@ module.exports = Marionette.CompositeView.extend({
                 clickable: true,
                 borderWidth: 0,
                 tickColor: "#E4E4E4"
-
             },
             yaxis: {
                 font: { color: "#555" }
@@ -164,8 +180,7 @@ module.exports = Marionette.CompositeView.extend({
             xaxis: {
                 mode: "time",
                 timezone: "browser",
-                minTickSize: [1, "month"],
-                timeformat: "%m/%y",
+                timeformat: "%d/%m/%y",
                 font: { color: "#555" },
                 tickColor: "#fafafa"
             },
@@ -187,12 +202,6 @@ module.exports = Marionette.CompositeView.extend({
         var donutLabelFormatter = function (label, series) {
             return "<div class=\"donut-label\">" + label + "<br/>" + Math.round(series.percent) + "%</div>";
         };
-
-        // var data = [
-        //     { label: "Direct",  data: 65},
-        //     { label: "Referral",  data: 20},
-        //     { label: "Others", data: 15}
-        // ];
 
         var config = {
             series: {
