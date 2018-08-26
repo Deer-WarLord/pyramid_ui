@@ -21,6 +21,7 @@ module.exports = Marionette.ItemView.extend({
         "themes_social_demo_query_admixer": "#themes-social-demo-query-admixer",
         "publications_social_demo_query_fg": "#publications-social-demo-query-fg",
         "themes_social_demo_query_fg": "#themes-social-demo-query-fg",
+        "keyword_chart_fg": "#keyword-chart-fg",
         "keyword_chart": "#keyword-chart",
         "admin_data_upload": "#admin-data-upload",
         "admin_user_roles": "#admin-user-roles",
@@ -37,6 +38,7 @@ module.exports = Marionette.ItemView.extend({
         'click @ui.publications_social_demo_query_fg': 'publicationsSocialDemoQueryFg',
         'click @ui.themes_social_demo_query_fg': 'themesSocialDemoQueryFg',
         'click @ui.keyword_chart': 'keywordChart',
+        'click @ui.keyword_chart_fg': 'keywordChartFg',
         'click @ui.admin_data_upload': 'showDataUploader',
         'click @ui.admin_user_roles': 'showUserRoles',
         'click @ui.admin_keys_update': 'showKeysUpdate',
@@ -140,11 +142,23 @@ module.exports = Marionette.ItemView.extend({
         this.ui.keyword_chart.parents("li").addClass("active");
     },
 
+    activateKeywordFgChart: function () {
+        this.ui.main_menu.find("li.active").removeClass("active");
+        this.ui.keyword_chart_fg.parents("li").addClass("active");
+    },
+
     keywordChart: function () {
         this.activateKeywordChart();
         this.model.clear();
         this.model.set("history", "chart-keyword");
         this.triggerMethod('show:chart:keyword');
+    },
+
+    keywordChartFg: function () {
+        this.activateKeywordFgChart();
+        this.model.clear();
+        this.model.set("history", "chart-keyword-fg");
+        this.triggerMethod('show:chart:keyword:fg');
     },
 
     activateShowDataUploader: function () {
