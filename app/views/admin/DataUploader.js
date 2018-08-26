@@ -65,7 +65,7 @@ module.exports = Marionette.ItemView.extend({
             success: function( respond, textStatus, jqXHR ){
                 if( typeof respond.error === 'undefined' ){
                     self.ui.alert.removeClass("out").addClass("in");
-                    e.target.reset();
+                    // e.target.reset();
                 } else {
                     console.log('ОШИБКИ ОТВЕТА сервера: ' + respond.error );
                 }
