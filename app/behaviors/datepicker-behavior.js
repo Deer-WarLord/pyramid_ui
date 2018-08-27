@@ -24,11 +24,11 @@ module.exports = Marionette.Behavior.extend({
             });
         };
         reportRangeID.daterangepicker({
-            startDate: '10/01/2017',
-            endDate: '10/30/2017',
+            startDate: '01/01/2018',
+            endDate: '01/07/2087',
             minDate: '01/01/1970',
             maxDate: '12/31/2024',
-            dateLimit: {days: 60},
+            dateLimit: {days: 360},
             showDropdowns: true,
             showWeekNumbers: true,
             timePicker: false,
