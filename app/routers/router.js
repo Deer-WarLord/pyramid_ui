@@ -29,6 +29,7 @@ module.exports = Marionette.AppRouter.extend({
 
         'chart-keyword/': "chartKeyword",
         'chart-keyword-fg/': "chartKeywordFg",
+        'chart-keyword-fg-sd/': "chartKeywordFgSd",
 
         'admin-data-uploader': 'admin_data_uploader',
         'admin-user-roles': 'admin_user_roles',

@@ -221,6 +221,20 @@ module.exports = Marionette.Controller.extend({
         }
     },
 
+    chartKeywordFgSd: function (fromDate, toDate) {
+        if (this.permissions.theme) {
+            if (fromDate && toDate) {
+                this.getOption('layout').model.set({
+                    "posted_date__gte": fromDate,
+                    "posted_date__lte": toDate
+                });
+            }
+            this.getOption('layout').onShowChartKeywordFgSd();
+            this.getOption('layout').left_sidebar.currentView.expandMenu($('#charts'));
+            this.getOption('layout').left_sidebar.currentView.activateKeywordFgSdChart();
+        }
+    },
+
     admin_data_uploader: function () {
         if (this.permissions.admin) {
             this.getOption('layout').onShowAdminDataUploader();

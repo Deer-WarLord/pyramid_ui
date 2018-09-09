@@ -1,0 +1,51 @@
+<div class="widget widget-table">
+    <div class="widget-header">
+        <h3><i class="fa fa-table"></i> Соц. демо по теме/компани в динамике</h3>
+        <div class="btn-group widget-header-toolbar">
+            <div class="control-inline toolbar-item-group">
+                <select id="themes-list" name="themesList"></select>
+                <input id="theme-list-query" type="hidden" />
+            </div>
+            <div class="control-inline toolbar-item-group">
+                <select id="sd-list" name="sdList">
+                    <option value="sex">Пол</option>
+                    <option value="age">Возраст</option>
+                    <option value="education">Образование</option>
+                    <option value="children_lt_16">Дети младше 16</option>
+                    <option value="marital_status">Семейный статус</option>
+                    <option value="occupation">Род занятий</option>
+                    <option value="group">Групп населения</option>
+                    <option value="income">Доход</option>
+                    <option value="region">Регион</option>
+                    <option value="typeNP">ТипНП</option>
+                </select>
+                <input id="sd-list-query" type="hidden" />
+            </div>
+            <div class="control-inline toolbar-item-group">
+                <div id="time-range" class="pull-right report-range">
+                    <i class="fa fa-calendar"></i>
+                    <span class="range-value"></span><b class="caret"></b>
+                    <input type="hidden"/>
+                </div>
+            </div>
+            <a href="#" title="Expand/Collapse" class="btn-borderless btn-toggle-expand"><i class="fa fa-chevron-up"></i></a>
+        </div>
+    </div>
+    <div class="widget-content">
+
+        <div class="demo-flot-chart" id="demo-vertical-bar-chart" data-ctype="#week"></div>
+    </div>
+</div>
+
+<div class="widget widget-table">
+    <div class="widget-header">
+        <h3><i class="fa fa-table"></i> Соц. демо по теме/компани общая</h3>
+        <div class="btn-group widget-header-toolbar">
+            <a href="#" title="Expand/Collapse" class="btn-borderless btn-toggle-expand"><i class="fa fa-chevron-up"></i></a>
+        </div>
+    </div>
+    <div class="widget-content">
+        <div class="demo-flot-chart" id="demo-donut-chart"></div>
+    </div>
+</div>
+

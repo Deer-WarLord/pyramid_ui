@@ -9,6 +9,7 @@ var SocialDemoRatingAdmixer = require('./social_demo_rating/table_admixer');
 var SocialDemoRatingFG = require('./social_demo_rating/table_fg');
 var KeywordChart = require('./charts/keyword-chart');
 var KeywordChartFg = require('./charts/keyword-chart-fg');
+var KeywordChartFgSd = require('./charts/keyword-chart-fg-sd');
 
 var AdminDataUploader = require('./admin/DataUploader');
 var AdminUserRoles = require('./admin/UserRoles');
@@ -60,6 +61,7 @@ module.exports = Marionette.LayoutView.extend({
 
         'show:chart:keyword': 'onShowChartKeyword',
         'show:chart:keyword:fg': 'onShowChartKeywordFg',
+        'show:chart:keyword:fg:sd': 'onShowChartKeywordFgSd',
 
         'show:admin:data:uploader': 'onShowAdminDataUploader',
         'show:admin:user:roles': 'onShowAdminUserRoles',
@@ -280,6 +282,18 @@ module.exports = Marionette.LayoutView.extend({
             this.showBars();
             this.$(this.regions.keyword_chart).show();
             this.showChildView('keyword_chart', new KeywordChartFg({
+                model: this.model,
+                permissions: this.initialData.permissions,
+                fixed_dates: this.initialData.dates
+            }));
+        }
+    },
+
+    onShowChartKeywordFgSd: function () {
+        if (this.initialData.permissions.theme) {
+            this.showBars();
+            this.$(this.regions.keyword_chart).show();
+            this.showChildView('keyword_chart', new KeywordChartFgSd({
                 model: this.model,
                 permissions: this.initialData.permissions,
                 fixed_dates: this.initialData.dates
