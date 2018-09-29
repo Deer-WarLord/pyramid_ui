@@ -163,12 +163,16 @@ var Table = Marionette.CompositeView.extend({
                      this.model.get("publication");
 
             if (this.ui.selectProvider.val() === "admixer") {
-                this.model.set('history', 'general-social-demo-rating-admixer/' + params);
-                this.triggerMethod('general:show:social:demo:admixer', "publication");
+                var history = 'general-social-demo-rating-admixer/' + params;
+                // this.model.set('history', 'general-social-demo-rating-admixer/' + params);
+                // this.triggerMethod('general:show:social:demo:admixer', "publication");
             } else if (this.ui.selectProvider.val() === "fg") {
-                this.model.set('history', 'general-social-demo-rating-fg/' + params);
-                this.triggerMethod('general:show:social:demo:fg', "publication");
+                history = 'general-social-demo-rating-fg/' + params;
+                // this.model.set('history', 'general-social-demo-rating-fg/' + params);
+                // this.triggerMethod('general:show:social:demo:fg', "publication");
             }
+
+            Backbone.history.navigate(history);
         }
     }
 });

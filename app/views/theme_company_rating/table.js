@@ -155,17 +155,22 @@ var Table = Marionette.CompositeView.extend({
             this.model.set("key_word", key_word);
 
             if (this.ui.selectQuery.val() === "publications") {
-                this.model.set('history', 'publication-rating/'+this.model.get('posted_date__gte')+"/"+this.model.get('posted_date__lte')+"/"+this.model.get("key_word"));
-                this.triggerMethod('show:publications');
+                var history = 'publication-rating/'+this.model.get('posted_date__gte')+"/"+this.model.get('posted_date__lte')+"/"+this.model.get("key_word");
+                // this.model.set('history', 'publication-rating/'+this.model.get('posted_date__gte')+"/"+this.model.get('posted_date__lte')+"/"+this.model.get("key_word"));
+                // this.triggerMethod('show:publications');
             } else if(this.ui.selectQuery.val() === "social-demo") {
                 if (this.ui.selectProvider.val() === "admixer") {
-                    this.model.set('history', 'specific-social-demo-rating-admixer/'+this.model.get('posted_date__gte')+"/"+this.model.get('posted_date__lte')+"/"+this.model.get("key_word"));
-                    this.triggerMethod('specific:show:social:demo:admixer');
+                    history = 'specific-social-demo-rating-admixer/'+this.model.get('posted_date__gte')+"/"+this.model.get('posted_date__lte')+"/"+this.model.get("key_word");
+                    // this.model.set('history', 'specific-social-demo-rating-admixer/'+this.model.get('posted_date__gte')+"/"+this.model.get('posted_date__lte')+"/"+this.model.get("key_word"));
+                    // this.triggerMethod('specific:show:social:demo:admixer');
                 } else if (this.ui.selectProvider.val() === "fg") {
-                    this.model.set('history', 'specific-social-demo-rating-fg/'+this.model.get('posted_date__gte')+"/"+this.model.get('posted_date__lte')+"/"+this.model.get("key_word"));
-                    this.triggerMethod('specific:show:social:demo:fg');
+                    history = 'specific-social-demo-rating-fg/'+this.model.get('posted_date__gte')+"/"+this.model.get('posted_date__lte')+"/"+this.model.get("key_word");
+                    // this.model.set('history', 'specific-social-demo-rating-fg/'+this.model.get('posted_date__gte')+"/"+this.model.get('posted_date__lte')+"/"+this.model.get("key_word"));
+                    // this.triggerMethod('specific:show:social:demo:fg');
                 }
             }
+
+            Backbone.history.navigate(history);
         }
     }
 
