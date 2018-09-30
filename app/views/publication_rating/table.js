@@ -148,12 +148,14 @@ var Table = Marionette.CompositeView.extend({
                     this.model.get("publication");
 
             if (this.ui.selectProvider.val() === "admixer") {
-                this.model.set('history', 'specific-social-demo-rating-admixer/' + params);
-                this.triggerMethod('specific:show:social:demo:admixer');
+                var history = 'specific-social-demo-rating-admixer/' + params;
+                // this.model.set('history', 'specific-social-demo-rating-admixer/' + params);
+                // this.triggerMethod('specific:show:social:demo:admixer');
 
             } else if (this.ui.selectProvider.val() === "fg") {
-                this.model.set('history', 'specific-social-demo-rating-fg/' + params);
-                this.triggerMethod('specific:show:social:demo:fg');
+                history = 'specific-social-demo-rating-fg/' + params;
+                // this.model.set('history', 'specific-social-demo-rating-fg/' + params);
+                // this.triggerMethod('specific:show:social:demo:fg');
             }
 
         } else {
@@ -163,7 +165,7 @@ var Table = Marionette.CompositeView.extend({
                      this.model.get("publication");
 
             if (this.ui.selectProvider.val() === "admixer") {
-                var history = 'general-social-demo-rating-admixer/' + params;
+                history = 'general-social-demo-rating-admixer/' + params;
                 // this.model.set('history', 'general-social-demo-rating-admixer/' + params);
                 // this.triggerMethod('general:show:social:demo:admixer', "publication");
             } else if (this.ui.selectProvider.val() === "fg") {
@@ -171,9 +173,8 @@ var Table = Marionette.CompositeView.extend({
                 // this.model.set('history', 'general-social-demo-rating-fg/' + params);
                 // this.triggerMethod('general:show:social:demo:fg', "publication");
             }
-
-            Backbone.history.navigate(history);
         }
+        Backbone.history.navigate(history);
     }
 });
 
