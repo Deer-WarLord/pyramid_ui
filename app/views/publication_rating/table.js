@@ -1,6 +1,7 @@
 // table_publication
 var Marionette = require('backbone.marionette');
 var moment = require("../../assets/js/plugins/moment/moment");
+var Cookies = require('js-cookie');
 var PublicationRatingCollection = require('../../collections/publication_rating');
 
 var Row = Marionette.LayoutView.extend({
@@ -36,7 +37,7 @@ var Table = Marionette.CompositeView.extend({
     },
 
     childView: Row,
-    childViewContainer: 'tbody',
+    childViewContainer: '#datatable-publications tbody',
 
     ui: {
         "reportRange": "#publication-reportrange",
@@ -44,13 +45,17 @@ var Table = Marionette.CompositeView.extend({
         "table": "#datatable-publications",
         "rowFilter": "#datatable-publications .row-filter input",
         "publication": ".publication",
-        "selectProvider": "#publication-provider-type"
+        "publicationList": ".publication-list",
+        "selectProvider": "#publication-provider-type",
+        "modalDialog": "#myModal"
     },
 
     events: {
         'keyup @ui.rowFilter': 'filterColumn',
         'click @ui.publication': 'getSocialDemo',
-        'change @ui.input': 'filterCollection'
+        'click @ui.publicationList': 'getPublicationList',
+        'change @ui.input': 'filterCollection',
+        'hidden.bs.modal @ui.modalDialog': 'onHideModal'
     },
 
     behaviors: {
@@ -175,7 +180,43 @@ var Table = Marionette.CompositeView.extend({
             }
         }
         Backbone.history.navigate(history);
+    },
+
+    getPublicationList: function (e) {
+        var publication = this.$(e.target).data("key");
+        var self = this;
+        $.ajax({
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader("X-CSRFToken", Cookies.get('csrftoken'));
+            },
+            url: '/noksfishes/publications-title-date/?publication='+publication,
+            type: 'GET',
+            success: function(data, status, callback) {
+                var table = self.$("#publications-list").DataTable({
+                    bDestroy: true,
+                    sDom: "t",
+                    data: data,
+                    scrollY: "300px",
+                    scrollCollapse: true,
+                    paging: false,
+                    columns: [
+                        { data: 'title' },
+                        { data: 'posted_date' }
+                    ]
+                });
+                self.$("#myModalLabel").html(publication);
+                self.$("#myModal").fadeIn();
+            }
+        });
+    },
+
+    onHideModal: function () {
+        this.$("#myModalLabel").html("СМИ");
+        var table = this.$("#publications-list").DataTable();
+        table.clear();
+        table.destroy();
     }
+
 });
 
 module.exports = Table;
