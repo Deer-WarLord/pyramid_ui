@@ -97,6 +97,7 @@ var Table = Marionette.CompositeView.extend({
                     Backbone.history.navigate(self.history);
                 }
                 setTimeout(function() {
+                    self.$('.publication, .publication-list').tooltip();
                     self.triggerMethod('fetched');
                     if (self.model.getParams() !== '') {
                         var dates = [self.model.get('posted_date__gte'), self.model.get('posted_date__lte')];
