@@ -107,17 +107,18 @@ module.exports = Marionette.CompositeView.extend({
     template: require('../../templates/charts/keyword-chart-sd.html'),
 
     childView: ThemeItem,
-    childViewContainer: '#themes-list',
+    childViewContainer: '.themes-list',
 
     ui: {
-        "dynamicChart": "#demo-vertical-bar-chart",
+        "dynamicChart": ".demo-vertical-bar-chart",
         "donutChart": "#demo-donut-chart",
-        "reportRange": "#time-range",
-        "input": "#time-range input",
-        "themesList": "#themes-list",
-        "inputThemeList": "#theme-list-query",
-        "sdList": "#sd-list",
-        "inputSdList": "#sd-list-query"
+        "reportRange": ".time-range",
+        "input": ".time-range input",
+        "themesList": ".themes-list",
+        "inputThemeList": ".theme-list-query",
+        "sdList": ".sd-list",
+        "inputSdList": ".sd-list-query",
+        "addChart": "#add-chart"
     },
 
     behaviors: {
@@ -129,7 +130,7 @@ module.exports = Marionette.CompositeView.extend({
                     buttonClass: 'btn btn-default btn-sm themesList',
                     nonSelectedText: 'Выберите тему',
                     onChange : function(option, checked) {
-                        this.$select.parent().children("#theme-list-query").trigger("change", [option.val(), checked]);
+                        this.$select.parent().children(".theme-list-query").trigger("change", [option.val(), checked]);
                     }
                 }
             },
@@ -140,7 +141,7 @@ module.exports = Marionette.CompositeView.extend({
                     buttonClass: 'btn btn-default btn-sm sdList',
                     nonSelectedText: 'Выберите cоц. демо',
                     onChange : function(option, checked) {
-                        this.$select.parent().children("#sd-list-query").trigger("change", [option.val(), checked]);
+                        this.$select.parent().children(".sd-list-query").trigger("change", [option.val(), checked]);
                     }
                 }
             }
@@ -152,16 +153,19 @@ module.exports = Marionette.CompositeView.extend({
     events: {
         'change @ui.inputThemeList': 'filterCollection',
         'change @ui.inputSdList': 'filterCollectionSd',
-        'change @ui.input': 'filterCollectionDates'
+        'change @ui.input': 'filterCollectionDates',
+        'click @ui.addChart': "addChart"
     },
 
     filterCollection: function(event, val, isTrue) {
         this.model.set("key_word", val);
+        this.ui.dynamicChart = this.$(event.target).parents(".widget").find(".demo-vertical-bar-chart");
         this.query();
     },
 
     filterCollectionSd: function(event, val, isTrue) {
         this.model.set("sd", val);
+        this.ui.dynamicChart = this.$(event.target).parents(".widget").find(".demo-vertical-bar-chart");
         this.query();
     },
 
@@ -174,6 +178,7 @@ module.exports = Marionette.CompositeView.extend({
                 "posted_date__gte": data.fromDate,
                 "posted_date__lte": data.toDate
             });
+            this.ui.dynamicChart = this.$(event.target).parents(".widget").find(".demo-vertical-bar-chart");
             this.query();
         } else {
             console.log("Some value is empty!");
@@ -192,7 +197,7 @@ module.exports = Marionette.CompositeView.extend({
             data: this.model.toJSON(),
             success: function( respond, textStatus, jqXHR ){
                 self.buildDynamicGraph(self.processGraphData(respond));
-                self.buildCircleGraph(self.processCircleGraphData(respond));
+                // self.buildCircleGraph(self.processCircleGraphData(respond));
             },
             error: function( jqXHR, textStatus, errorThrown ){
                 console.log(jqXHR);
@@ -358,6 +363,21 @@ module.exports = Marionette.CompositeView.extend({
             data: this.model.attributes
         });
         self.query();
+    },
+
+    addChart: function () {
+        this.$el.append(require('../../templates/charts/keyword-chart-sd-tmpl.html'));
+        var marketsTmpl = _.template(
+            '<% for(var i in collection) { %>\n' +
+            '<optgroup label="<%= collection[i].market %>">\n' +
+            '    <% for(var j in collection[i].keywords) { %>\n' +
+            '    <option value="<%= collection[i].keywords[j] %>"><%= collection[i].keywords[j] %></option>\n' +
+            '    <% } %>\n' +
+            '</optgroup>\n' +
+            '<% } %>');
+        this.$(".themes-list").html(marketsTmpl({collection: this.collection.toJSON()}));
+        this.triggerMethod("updateDateControls", this.$(".time-range").last(), this.$(".time-range input").last, this.options);
+        this.triggerMethod('fetched');
     }
 
 });
