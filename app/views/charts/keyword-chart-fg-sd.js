@@ -253,11 +253,16 @@ module.exports = Marionette.CompositeView.extend({
                 })
             });
 
-            result = _.chain(result).pairs()
-                      .map(function (item) {
-                            return {label: item[0], data: item[1]};
-                        })
-                      .value();
+            result = _.chain(result).mapObject(function(val, key) {
+                    return _.chain(val)
+                            .groupBy(function(item) {return item[0];})
+                            .mapObject(function(val, key){
+                                return _.reduce(val, function(s, item) {
+                                    return s + item[1]}, 0);
+                            })
+                            .pairs().value();
+            }).pairs().map(function (item) { return {label: item[0], data: item[1]};}).value();
+
         }
 
         return result;
@@ -358,8 +363,9 @@ module.exports = Marionette.CompositeView.extend({
             themes = _.map($wrapper.find('.form2').serializeArray(), function (item) { return item.value; });
 
             if (themes.length > 0) {
-                this.model.set("key_word", themes[0]);
+                this.model.set("key_word__in", JSON.stringify(themes));
                 this.ui.dynamicChart = this.$(event.target).parents(".wizard-wrapper").find(".demo-vertical-bar-chart");
+                this.$(event.target).parents(".wizard-wrapper").find(".sd-chart-title").html(themes.join());
                 this.triggerMethod("updateDateControls", $wrapper.find(".time-range"), $wrapper.find(".time-range input"), this.options);
                 this.query();
             } else {
