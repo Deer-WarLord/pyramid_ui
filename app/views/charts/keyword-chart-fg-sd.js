@@ -78,16 +78,34 @@ var SD_MAP = {
     }
 };
 
+var marketsTmpl = _.template(
+    '<% for(var i in collection) { %>\n' +
+    '<optgroup label="<%= collection[i].market %>">\n' +
+    '    <% for(var j in collection[i].keywords) { %>\n' +
+    '    <option value="<%= collection[i].keywords[j] %>"><%= collection[i].keywords[j] %></option>\n' +
+    '    <% } %>\n' +
+    '</optgroup>\n' +
+    '<% } %>');
+
+var simpleMarketsTmpl = _.template(
+    '<% for(var i in collection) { %>\n' +
+    '<option value="<%= collection[i].market %>"><%= collection[i].market %></option>\n' +
+    '<% } %>');
+
+var formatSelectBox = function(state) {
+    return '<div class="label label-success">' + $(state.element).parent().attr("label") + '</div>'+
+        '<div class="label label-primary">' + state.text + '</div>';
+};
+
 var Themes = Backbone.Collection.extend({
     url: 'charts/themes'
 });
 
-
 var ThemeItem = Marionette.ItemView.extend({
     initialize: function() {
-        this.$el.attr("label", this.model.get("market"));
+        this.$el.attr("value", this.model.get("market"));
     },
-    tagName: "optgroup",
+    tagName: "option",
     template: require('../../templates/theme_item.html')
 });
 
@@ -107,32 +125,34 @@ module.exports = Marionette.CompositeView.extend({
     template: require('../../templates/charts/keyword-chart-sd.html'),
 
     childView: ThemeItem,
-    childViewContainer: '.themes-list',
+    childViewContainer: '.markets-selection',
 
     ui: {
         "dynamicChart": ".demo-vertical-bar-chart",
-        "donutChart": "#demo-donut-chart",
         "reportRange": ".time-range",
         "input": ".time-range input",
-        "themesList": ".themes-list",
-        "inputThemeList": ".theme-list-query",
         "sdList": ".sd-list",
         "inputSdList": ".sd-list-query",
-        "addChart": "#add-chart"
+        "addChart": "#add-chart",
+        "selectMarket": ".markets-selection",
+        "selectThemeCompany": "select.themes-selection",
+        "wizard": ".wizard",
+        "wizardNext": ".wizard-wrapper .btn-next",
+        "wizardPrev": ".wizard-wrapper .btn-prev"
     },
 
     behaviors: {
         jQueryBehaviorOnFetch: {
-            '@ui.themesList': {
+            '@ui.selectMarket': {
                 'multiselect': {
-                    maxHeight: 300,
+                    maxHeight: 400,
                     enableFiltering: true,
-                    buttonClass: 'btn btn-default btn-sm themesList',
-                    nonSelectedText: 'Выберите тему',
-                    onChange : function(option, checked) {
-                        this.$select.parent().children(".theme-list-query").trigger("change", [option.val(), checked]);
-                    }
+                    buttonClass: 'btn btn-default btn-sm',
+                    nonSelectedText: 'Рынки'
                 }
+            },
+            '@ui.selectThemeCompany': {
+                "select2": {}
             },
             '@ui.sdList': {
                 'multiselect': {
@@ -151,16 +171,12 @@ module.exports = Marionette.CompositeView.extend({
     },
 
     events: {
-        'change @ui.inputThemeList': 'filterCollection',
         'change @ui.inputSdList': 'filterCollectionSd',
         'change @ui.input': 'filterCollectionDates',
-        'click @ui.addChart': "addChart"
-    },
-
-    filterCollection: function(event, val, isTrue) {
-        this.model.set("key_word", val);
-        this.ui.dynamicChart = this.$(event.target).parents(".widget").find(".demo-vertical-bar-chart");
-        this.query();
+        'click @ui.addChart': "addChart",
+        'change @ui.wizard': "wizardChange",
+        'click @ui.wizardNext': "wizardNext",
+        'click @ui.wizardPrev': "wizardPrev"
     },
 
     filterCollectionSd: function(event, val, isTrue) {
@@ -197,7 +213,6 @@ module.exports = Marionette.CompositeView.extend({
             data: this.model.toJSON(),
             success: function( respond, textStatus, jqXHR ){
                 self.buildDynamicGraph(self.processGraphData(respond));
-                // self.buildCircleGraph(self.processCircleGraphData(respond));
             },
             error: function( jqXHR, textStatus, errorThrown ){
                 console.log(jqXHR);
@@ -248,32 +263,6 @@ module.exports = Marionette.CompositeView.extend({
         return result;
     },
 
-    processCircleGraphData: function (data) {
-
-        var results =  _.chain(data)
-                        .groupBy(function(item) { return item.key_word; })
-                        .mapObject(function(val, key) {
-                            return _.reduce(val, function(memo, item){
-                                return memo + item.views;
-                            }, 0);
-                        })
-                        .pairs()
-                        .map(function (item) {
-                            return {label: item[0], data: item[1]};
-                        })
-                        .value();
-
-        var total = results.reduce(function(memo, item) {
-            return memo + item.data
-        }, 0);
-
-        results.forEach(function(item) {
-            item.data = (item.data * 100 / total).toFixed(2);
-        });
-
-        return results;
-    },
-
     // get day function
     gt: function(y, m, d) {
         return new Date(y, m-1, d).getTime();
@@ -315,41 +304,14 @@ module.exports = Marionette.CompositeView.extend({
             }
         };
         console.log(data);
-        $.plot(this.ui.dynamicChart, data, config);
+        try {
+            $.plot(this.ui.dynamicChart, data, config);
+        } catch (err) {
+            alert("По этому запросу данных не найдено");
+        }
+
     },
 
-    buildCircleGraph: function (data) {
-
-        var donutLabelFormatter = function (label, series) {
-            return "<div class=\"donut-label\">" + label + "<br/>" + Math.round(series.percent) + "%</div>";
-        };
-
-        var config = {
-            series: {
-                pie: {
-                    show: true,
-                    innerRadius: .4,
-                    stroke: {
-                        width: 4,
-                        color: "#ffffff"
-                    },
-                    label: {
-                        show: true,
-                        radius: 3/4,
-                        formatter: donutLabelFormatter
-                    }
-                }
-            },
-            legend: {
-                show: false
-            },
-            grid: {
-                hoverable: true
-            }
-        };
-
-        $.plot('#demo-donut-chart', data, config);
-    },
 
     onShow: function() {
         var self = this;
@@ -365,19 +327,64 @@ module.exports = Marionette.CompositeView.extend({
         self.query();
     },
 
-    addChart: function () {
-        this.$el.append(require('../../templates/charts/keyword-chart-sd-tmpl.html'));
-        var marketsTmpl = _.template(
-            '<% for(var i in collection) { %>\n' +
-            '<optgroup label="<%= collection[i].market %>">\n' +
-            '    <% for(var j in collection[i].keywords) { %>\n' +
-            '    <option value="<%= collection[i].keywords[j] %>"><%= collection[i].keywords[j] %></option>\n' +
-            '    <% } %>\n' +
-            '</optgroup>\n' +
-            '<% } %>');
-        this.$(".themes-list").html(marketsTmpl({collection: this.collection.toJSON()}));
-        this.triggerMethod("updateDateControls", this.$(".time-range").last(), this.$(".time-range input").last, this.options);
+    addChart: function (event) {
+        var chartSdTmpl = require('../../templates/charts/keyword-chart-sd-tmpl.html');
+        this.$el.append(chartSdTmpl({"uid": Math.round(event.timeStamp)}));
+        this.$(".markets-selection").html(simpleMarketsTmpl({collection: this.collection.toJSON()}));
         this.triggerMethod('fetched');
+    },
+
+    wizardChange: function (e, data) {
+
+        var $wrapper = $(e.target).parents(".wizard-wrapper");
+        var $btnNext = $wrapper.find('.btn-next');
+
+        if((data.step === 1 && data.direction === 'next')) {
+
+            var markets = _.map($wrapper.find('.form1').serializeArray(), function (item) { return item.value; });
+
+            if (markets.length > 0) {
+                var themes = _.filter(this.collection.toJSON(), function (item) { return _.contains(markets, item.market); });
+                $wrapper.find(".themes-selection").html(marketsTmpl({collection: themes}));
+                this.triggerMethod('fetched');
+            } else {
+                return false;
+            }
+
+            $btnNext.show();
+            $btnNext.text(' Построить график').prepend('<i class="fa fa-check-circle"></i>')
+                    .removeClass('btn-primary').addClass('btn-success');
+        } else if(data.step === 2 && data.direction === 'next') {
+            themes = _.map($wrapper.find('.form2').serializeArray(), function (item) { return item.value; });
+
+            if (themes.length > 0) {
+                this.model.set("key_word", themes[0]);
+                this.ui.dynamicChart = this.$(event.target).parents(".wizard-wrapper").find(".demo-vertical-bar-chart");
+                this.triggerMethod("updateDateControls", $wrapper.find(".time-range"), $wrapper.find(".time-range input"), this.options);
+                this.query();
+            } else {
+                return false;
+            }
+
+            $btnNext.hide();
+        } else if (data.step === 3 && data.direction === 'previous'){
+            $btnNext.show();
+            $btnNext.text(' Построить график').prepend('<i class="fa fa-check-circle"></i>')
+                .removeClass('btn-primary').addClass('btn-success');
+        } else {
+            $btnNext.show();
+            $btnNext.text('Далее ').
+            append('<i class="fa fa-arrow-right"></i>')
+                .removeClass('btn-success').addClass('btn-primary');
+        }
+    },
+
+    wizardNext: function (event) {
+        this.$(event.target).parents(".wizard-wrapper").find(".wizard").wizard('next');
+    },
+
+    wizardPrev: function () {
+        this.$(event.target).parents(".wizard-wrapper").find(".wizard").wizard('previous');
     }
 
 });

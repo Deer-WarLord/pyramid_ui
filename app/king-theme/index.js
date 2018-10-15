@@ -12,6 +12,8 @@ require("../assets/js/plugins/daterangepicker/daterangepicker");
 require("../assets/js/plugins/bootstrap-multiselect/bootstrap-multiselect");
 require("../assets/js/plugins/stat/flot/jquery.flot.min");
 // require("../assets/js/plugins/stat/flot/jquery.flot.resize.min");
+require("../assets/js/plugins/select2/select2.min");
+require("../assets/js/plugins/wizard/wizard");
 require("../assets/js/plugins/stat/flot/jquery.flot.time.min");
 require("../assets/js/plugins/stat/flot/jquery.flot.pie.min");
 require("../assets/js/plugins/stat/flot/jquery.flot.orderBars");
