@@ -8,7 +8,8 @@
                 <ul class="steps">
                     <li data-target="#step1" class="active"><span class="badge badge-info">1</span>Рынки<span class="chevron"></span></li>
                     <li data-target="#step2"><span class="badge">2</span>Темы / Компании<span class="chevron"></span></li>
-                    <li data-target="#step3"><span class="badge">3</span>График<span class="chevron"></span></li>
+                    <li data-target="#step3"><span class="badge">3</span>Провайдеры<span class="chevron"></span></li>
+                    <li data-target="#step4"><span class="badge">4</span>График<span class="chevron"></span></li>
                 </ul>
             </div>
             <div class="step-content">
@@ -25,22 +26,49 @@
                     </form>
                 </div>
                 <div class="step-pane" id="step3">
+                    <form class="form3" data-parsley-validate novalidate>
+                        <p>Выберите поставщика данных:</p>
+                        <label class="control-inline fancy-radio">
+                            <input type="radio" name="provider" value="/charts/keyword-fg-sd/">
+                            <span><i></i>Factrum Group</span>
+                        </label>
+                        <label class="control-inline fancy-radio">
+                            <input type="radio" name="provider" value="/charts/keyword-admixer-sd/">
+                            <span><i></i>Admixer</span>
+                        </label>
+                    </form>
+                </div>
+                <div class="step-pane" id="step4">
                     <div class="widget widget-table">
                         <div class="widget-header">
                             <h3><i class="fa fa-table"></i> Соц. демо <span class="sd-chart-title"></span></h3>
                             <div class="btn-group widget-header-toolbar">
                                 <div class="control-inline toolbar-item-group">
                                     <select class="sd-list" name="sdList">
-                                        <option value="sex">Пол</option>
-                                        <option value="age">Возраст</option>
-                                        <option value="education">Образование</option>
-                                        <option value="children_lt_16">Дети младше 16</option>
-                                        <option value="marital_status">Семейный статус</option>
-                                        <option value="occupation">Род занятий</option>
-                                        <option value="group">Групп населения</option>
-                                        <option value="income">Доход</option>
-                                        <option value="region">Регион</option>
-                                        <option value="typeNP">ТипНП</option>
+                                        <!--Factrum Group-->
+                                        <optgroup label="Factrum Group">
+                                            <option class="fg-sd" value="sex">Пол</option>
+                                            <option class="fg-sd" value="age">Возраст</option>
+                                            <option class="fg-sd" value="education">Образование</option>
+                                            <option class="fg-sd" value="children_lt_16">Дети младше 16</option>
+                                            <option class="fg-sd" value="marital_status">Семейный статус</option>
+                                            <option class="fg-sd" value="occupation">Род занятий</option>
+                                            <option class="fg-sd" value="group">Групп населения</option>
+                                            <option class="fg-sd" value="income">Доход</option>
+                                            <option class="fg-sd" value="region">Регион</option>
+                                            <option class="fg-sd" value="typeNP">ТипНП</option>
+                                        </optgroup>
+                                        <!---->
+                                        <!--Admixer-->
+                                        <optgroup label="Admixer">
+                                            <option class="admixer-sd" value="platform">Платформа</option>
+                                            <option class="admixer-sd" value="browser">Браузер</option>
+                                            <option class="admixer-sd" value="age">Возраст</option>
+                                            <option class="admixer-sd" value="gender">Гендер</option>
+                                            <!--<option class="admixer-sd" value="region">Регион</option>-->
+                                            <!--<option class="admixer-sd" value="income">Групп населения</option>-->
+                                        </optgroup>
+                                        <!---->
                                     </select>
                                     <input class="sd-list-query" type="hidden" />
                                 </div>

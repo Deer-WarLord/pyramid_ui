@@ -12,7 +12,7 @@ var ThemeItem = Marionette.ItemView.extend({
         this.$el.attr("label", this.model.get("market"));
     },
     tagName: "optgroup",
-    template: require('../../templates/theme_item.html')
+    template: require('../../templates/theme_item_grouped.html')
 });
 
 module.exports = Marionette.CompositeView.extend({

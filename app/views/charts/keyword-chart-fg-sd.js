@@ -2,7 +2,7 @@ var Backbone = require('backbone');
 var Marionette = require('backbone.marionette');
 var Cookies = require('js-cookie');
 
-var SD_MAP = {
+var FACTRUM_SD_MAP = {
     "sex": {
         "male": "Мужчин",
         "female": "Женщин"
@@ -77,6 +77,76 @@ var SD_MAP = {
         "50-": "50-"
     }
 };
+
+var ADMIXER_SD_MAP = {
+    "platform": {
+        0: "Неизвестно",
+        1: "IPad",
+        2: "IPod",
+        3: "IPhone",
+        4: "Windows_Phone_7",
+        5: "Android_tablet",
+        6: "Android_phone",
+        7: "BlackBerry",
+        8: "Symbian",
+        9: "Bada",
+        10: "Win8_tablet",
+        11: "Win_phone_8",
+        12: "Palm",
+        13: "Motorola",
+        14: "WinCE",
+        15: "Win95",
+        16: "Win98",
+        17: "WinME",
+        18: "Win2000",
+        19: "WinXP",
+        20: "WinVista",
+        21: "Win7",
+        22: "Win8",
+        23: "WinRT",
+        24: "Mac",
+        25: "Linux",
+        26: "Irix",
+        27: "Sun",
+        28: "Win10",
+        29: "Win_phone_10"
+    },
+    "browser": {
+        0: "Неизвестно",
+        1: "IE",
+        2: "Firefox",
+        3: "Chrome",
+        4: "Safari",
+        5: "Opera",
+        6: "Yandex",
+        7: "IE7andLower",
+        8: "IE8",
+        9: "IE9",
+        10: "IE10",
+        11: "IE11",
+        12: "Edge"
+    },
+    "region": {
+
+    },
+    "age": {
+        0: "Неизвестно",
+        1: "до 18",
+        2: "от 18 до 24",
+        3: "от 25 до 34",
+        4: "от 35 до 44",
+        5: "после 45"
+    },
+    "gender": {
+        0: "Неизвестно",
+        1: "Мужчин",
+        2: "Женщин"
+    },
+    "income": {
+
+    }
+};
+
 
 var marketsTmpl = _.template(
     '<% for(var i in collection) { %>\n' +
@@ -203,16 +273,18 @@ module.exports = Marionette.CompositeView.extend({
 
     query: function() {
         var self = this;
+        var url = this.model.get("url") || "/charts/keyword-fg-sd/";
+        var sdMap = (url.includes("-fg-")) ? FACTRUM_SD_MAP : ADMIXER_SD_MAP;
         $.ajax({
             beforeSend: function(xhr, settings) {
                 xhr.setRequestHeader("X-CSRFToken", Cookies.get('csrftoken'));
             },
             dataType: "json",
             contentType: "application/json",
-            url: "/charts/keyword-fg-sd/",
-            data: this.model.toJSON(),
+            url: url,
+            data: _.omit(this.model.toJSON(), "url"),
             success: function( respond, textStatus, jqXHR ){
-                self.buildDynamicGraph(self.processGraphData(respond));
+                self.buildDynamicGraph(self.processGraphData(respond, sdMap, url));
             },
             error: function( jqXHR, textStatus, errorThrown ){
                 console.log(jqXHR);
@@ -220,7 +292,7 @@ module.exports = Marionette.CompositeView.extend({
         });
     },
 
-    processGraphData: function (data) {
+    processGraphData: function (data, sdMap, url) {
         var self = this;
         var sdKey = this.model.get("sd");
 
@@ -239,19 +311,33 @@ module.exports = Marionette.CompositeView.extend({
                 .value();
         } else {
             result = {};
-            var keys = _.keys(SD_MAP[sdKey]);
 
-            _.each(keys, function(el){
-                result[el] = [];
-            });
+            if (url.includes("-fg-")) {
+                var keys = _.keys(sdMap[sdKey]);
 
-            _.each(data, function (el_i) {
-                _.each(keys, function (el_j) {
-                    var views = el_i[sdKey][el_j];
-                    views = (views !== undefined) ? views/100.0 * el_i.views : 0;
-                    result[el_j].push([self.gt.apply(self, el_i.date.split("-")), views]);
-                })
-            });
+                _.each(keys, function(el){
+                    result[el] = [];
+                });
+
+                _.each(data, function (el_i) {
+                    _.each(keys, function (el_j) {
+                        var views = el_i[sdKey][el_j];
+                        views = (views !== undefined) ? views/100.0 * el_i.views : 0;
+                        result[el_j].push([self.gt.apply(self, el_i.date.split("-")), views]);
+                    })
+                });
+            } else {
+                keys = _.values(sdMap[sdKey]);
+
+                _.each(keys, function(el){
+                    result[el] = [];
+                });
+
+                _.each(data, function (el_i) {
+                    result[sdMap[sdKey][el_i[sdKey]]].push([self.gt.apply(self, el_i.date.split("-")), el_i.views]);
+                });
+
+            }
 
             result = _.chain(result).mapObject(function(val, key) {
                     return _.chain(val)
@@ -357,23 +443,45 @@ module.exports = Marionette.CompositeView.extend({
             }
 
             $btnNext.show();
-            $btnNext.text(' Построить график').prepend('<i class="fa fa-check-circle"></i>')
-                    .removeClass('btn-primary').addClass('btn-success');
+            $btnNext.text('Далее ').
+            append('<i class="fa fa-arrow-right"></i>')
+                .removeClass('btn-success').addClass('btn-primary');
         } else if(data.step === 2 && data.direction === 'next') {
-            themes = _.map($wrapper.find('.form2').serializeArray(), function (item) { return item.value; });
+            themes = _.map($wrapper.find('.form2').serializeArray(), function (item) {
+                return item.value;
+            });
 
             if (themes.length > 0) {
                 this.model.set("key_word__in", JSON.stringify(themes));
-                this.ui.dynamicChart = this.$(event.target).parents(".wizard-wrapper").find(".demo-vertical-bar-chart");
-                this.$(event.target).parents(".wizard-wrapper").find(".sd-chart-title").html(themes.join());
-                this.triggerMethod("updateDateControls", $wrapper.find(".time-range"), $wrapper.find(".time-range input"), this.options);
-                this.query();
             } else {
                 return false;
             }
 
+            $btnNext.show();
+            $btnNext.text(' Построить график').prepend('<i class="fa fa-check-circle"></i>')
+                .removeClass('btn-primary').addClass('btn-success');
+
+        } else if (data.step === 3 && data.direction === 'next' ) {
+
+            var url = _.map($wrapper.find('.form3').serializeArray(), function (item) {
+                return item.value;
+            });
+
+            if (url.length > 0) {
+                this.model.set("url", url[0]);
+                var hideClass = (url[0].includes("-fg-")) ? ".admixer-sd" : ".fg-sd";
+            } else {
+                return false;
+            }
+
+            this.ui.dynamicChart = this.$(event.target).parents(".wizard-wrapper").find(".demo-vertical-bar-chart");
+            this.$(event.target).parents(".wizard-wrapper").find(".sd-chart-title").html(JSON.parse(this.model.get("key_word__in")).join());
+            $wrapper.find(hideClass).hide();
+            this.triggerMethod("updateDateControls", $wrapper.find(".time-range"), $wrapper.find(".time-range input"), this.options);
+            this.query();
             $btnNext.hide();
-        } else if (data.step === 3 && data.direction === 'previous'){
+
+        } else if (data.step === 4 && data.direction === 'previous'){
             $btnNext.show();
             $btnNext.text(' Построить график').prepend('<i class="fa fa-check-circle"></i>')
                 .removeClass('btn-primary').addClass('btn-success');
