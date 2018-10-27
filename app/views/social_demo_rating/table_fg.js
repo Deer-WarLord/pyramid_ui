@@ -182,8 +182,7 @@ var Row = Marionette.LayoutView.extend({
                 newData[TypeNPMap[key]] = typeNP[key];
             }
             return newData;
-        },
-
+        }
     }
 });
 

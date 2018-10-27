@@ -147,7 +147,7 @@ module.exports = Marionette.LayoutView.extend({
             this.model.set({
                 "posted_date__gte": data[0],
                 "posted_date__lte": data[1],
-                "market": data[2]
+                "market__in": data[2]
             });
             this.showBars();
             this.left_sidebar.currentView.activateMarketsQuery();

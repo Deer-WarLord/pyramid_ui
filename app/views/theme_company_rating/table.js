@@ -45,8 +45,8 @@ var Table = Marionette.CompositeView.extend({
         "rowFilter": "#datatable-themes-companies .row-filter input",
         "input": "#theme-reportrange input",
         "selectQuery": "#query-type",
-        "selectProvider": "#theme-provider-type"
-
+        "selectProvider": "#theme-provider-type",
+        "querySd": "#query-sd"
     },
 
     behaviors: {
@@ -87,8 +87,9 @@ var Table = Marionette.CompositeView.extend({
 
     events: {
         'keyup @ui.rowFilter': 'filterColumn',
-        'click @ui.key_word': 'dispatcher',
-        'change @ui.input': 'filterCollection'
+        'click @ui.key_word': 'selectKeyWord',
+        'change @ui.input': 'filterCollection',
+        'click @ui.querySd': 'querySd'
     },
 
     onShow: function(child, construcotr, dates) {
@@ -97,7 +98,7 @@ var Table = Marionette.CompositeView.extend({
         if (!(dates && dates.length === 2) || !this.options.permissions.free_time) {
             dates = self.options.fixed_dates;
         }
-
+        this.ui.querySd.hide();
         this.collection.fetch({
             success: function() {
                 if (self.history) {
@@ -136,6 +137,7 @@ var Table = Marionette.CompositeView.extend({
                 "posted_date__gte": data.fromDate,
                 "posted_date__lte": data.toDate
             });
+            this.ui.querySd.hide();
             this.collection.fetch({
                 success: function () {
                     self.triggerMethod('fetched');
@@ -148,28 +150,37 @@ var Table = Marionette.CompositeView.extend({
         }
     },
 
-    dispatcher: function(domEvent) {
-        var key_word = domEvent.toElement.innerHTML;
-        if (this.model.get('posted_date__gte') && this.model.get('posted_date__lte')) {
-            this.model.set("page", 1);
-            this.model.set("key_word", key_word);
+    selectKeyWord: function(domEvent) {
+        this.$(domEvent.toElement).toggleClass("select");
+        if (this.$(".select").length > 0) {
+            this.ui.querySd.show();
+        } else {
+            this.ui.querySd.hide();
+        }
+    },
 
-            if (this.ui.selectQuery.val() === "publications") {
-                var history = 'publication-rating/'+this.model.get('posted_date__gte')+"/"+this.model.get('posted_date__lte')+"/"+this.model.get("key_word");
-                // this.model.set('history', 'publication-rating/'+this.model.get('posted_date__gte')+"/"+this.model.get('posted_date__lte')+"/"+this.model.get("key_word"));
-                // this.triggerMethod('show:publications');
-            } else if(this.ui.selectQuery.val() === "social-demo") {
-                if (this.ui.selectProvider.val() === "admixer") {
-                    history = 'specific-social-demo-rating-admixer/'+this.model.get('posted_date__gte')+"/"+this.model.get('posted_date__lte')+"/"+this.model.get("key_word");
-                    // this.model.set('history', 'specific-social-demo-rating-admixer/'+this.model.get('posted_date__gte')+"/"+this.model.get('posted_date__lte')+"/"+this.model.get("key_word"));
-                    // this.triggerMethod('specific:show:social:demo:admixer');
-                } else if (this.ui.selectProvider.val() === "fg") {
-                    history = 'specific-social-demo-rating-fg/'+this.model.get('posted_date__gte')+"/"+this.model.get('posted_date__lte')+"/"+this.model.get("key_word");
-                    // this.model.set('history', 'specific-social-demo-rating-fg/'+this.model.get('posted_date__gte')+"/"+this.model.get('posted_date__lte')+"/"+this.model.get("key_word"));
-                    // this.triggerMethod('specific:show:social:demo:fg');
-                }
+    querySd: function (e) {
+        var self = this;
+        var key_words = [];
+        this.$(".select").each(function(i, item) {key_words.push(self.$(item).text());});
+
+        if (key_words.length > 0 && this.model.get('posted_date__gte') && this.model.get('posted_date__lte')) {
+            if (this.model.has("market__in")) {
+                this.model.unset("market__in");
             }
 
+            this.model.set("page", 1);
+            this.model.set("key_word__in", JSON.stringify(key_words));
+
+            if (this.ui.selectQuery.val() === "publications") {
+                var history = 'publication-rating/'+this.model.get('posted_date__gte')+"/"+this.model.get('posted_date__lte')+"/"+this.model.get("key_word__in");
+            } else if(this.ui.selectQuery.val() === "social-demo") {
+                if (this.ui.selectProvider.val() === "admixer") {
+                    history = 'specific-social-demo-rating-admixer/'+this.model.get('posted_date__gte')+"/"+this.model.get('posted_date__lte')+"/"+this.model.get("key_word__in");
+                } else if (this.ui.selectProvider.val() === "fg") {
+                    history = 'specific-social-demo-rating-fg/'+this.model.get('posted_date__gte')+"/"+this.model.get('posted_date__lte')+"/"+this.model.get("key_word__in");
+                }
+            }
             Backbone.history.navigate(history);
         }
     }

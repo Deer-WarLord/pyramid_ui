@@ -131,6 +131,7 @@ var Table = Marionette.CompositeView.extend({
             });
             this.collection.fetch({
                 success: function() {
+                    self.$('.publication, .publication-list').tooltip();
                     self.triggerMethod('fetched');
                 },
                 data: self.model.attributes
@@ -150,18 +151,14 @@ var Table = Marionette.CompositeView.extend({
 
             params = this.model.get('posted_date__gte')+"/"+
                      this.model.get('posted_date__lte')+"/"+
-                     this.model.get("key_word")+"/"+
+                     this.model.get("key_word__in")+"/"+
                     this.model.get("publication");
 
             if (this.ui.selectProvider.val() === "admixer") {
                 var history = 'specific-social-demo-rating-admixer/' + params;
-                // this.model.set('history', 'specific-social-demo-rating-admixer/' + params);
-                // this.triggerMethod('specific:show:social:demo:admixer');
 
             } else if (this.ui.selectProvider.val() === "fg") {
                 history = 'specific-social-demo-rating-fg/' + params;
-                // this.model.set('history', 'specific-social-demo-rating-fg/' + params);
-                // this.triggerMethod('specific:show:social:demo:fg');
             }
 
         } else {
@@ -172,12 +169,8 @@ var Table = Marionette.CompositeView.extend({
 
             if (this.ui.selectProvider.val() === "admixer") {
                 history = 'general-social-demo-rating-admixer/' + params;
-                // this.model.set('history', 'general-social-demo-rating-admixer/' + params);
-                // this.triggerMethod('general:show:social:demo:admixer', "publication");
             } else if (this.ui.selectProvider.val() === "fg") {
                 history = 'general-social-demo-rating-fg/' + params;
-                // this.model.set('history', 'general-social-demo-rating-fg/' + params);
-                // this.triggerMethod('general:show:social:demo:fg', "publication");
             }
         }
         Backbone.history.navigate(history);

@@ -71,7 +71,7 @@ module.exports = Marionette.Controller.extend({
             });
 
             if (key_word) {
-                this.getOption('layout').model.set("key_word", key_word);
+                this.getOption('layout').model.set("key_word__in", key_word);
             }
 
             this.getOption('layout').triggerMethod('show:publications');
@@ -83,7 +83,7 @@ module.exports = Marionette.Controller.extend({
             this.getOption('layout').model.set({
                 "posted_date__gte": fromDate,
                 "posted_date__lte": toDate,
-                "key_word": key_word
+                "key_word__in": key_word
             });
 
             if (publication) {
@@ -99,7 +99,7 @@ module.exports = Marionette.Controller.extend({
             this.getOption('layout').model.set({
                 "posted_date__gte": fromDate,
                 "posted_date__lte": toDate,
-                "key_word": key_word
+                "key_word__in": key_word
             });
 
             if (publication) {

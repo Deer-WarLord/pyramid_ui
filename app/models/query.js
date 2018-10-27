@@ -30,7 +30,7 @@ module.exports = Backbone.Model.extend({
     },
 
     isValidForPublications: function () {
-        return (this.get("posted_date__gte") && this.get("posted_date__lte") && this.get("key_word"))
+        return (this.get("posted_date__gte") && this.get("posted_date__lte") && this.get("key_word__in"))
     }
 
 });

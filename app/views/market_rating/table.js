@@ -43,7 +43,8 @@ var Table = Marionette.CompositeView.extend({
         "market": ".market",
         "table": "#datatable-market",
         "rowFilter": "#datatable-market .row-filter input",
-        "input": "#market-reportrange input"
+        "input": "#market-reportrange input",
+        "queryThemes": "#query-themes"
     },
 
     behaviors: {
@@ -62,7 +63,8 @@ var Table = Marionette.CompositeView.extend({
 
     events: {
         'keyup @ui.rowFilter': 'filterColumn',
-        'click @ui.market': 'dispatcher',
+        'click @ui.market': 'selectMarket',
+        'click @ui.queryThemes': 'queryThemes',
         'change @ui.input': 'filterCollection'
     },
 
@@ -72,7 +74,7 @@ var Table = Marionette.CompositeView.extend({
         if (!(dates && dates.length === 2) || !this.options.permissions.free_time) {
             dates = self.options.fixed_dates;
         }
-
+        self.ui.queryThemes.hide();
         this.collection.fetch({
             success: function() {
                 setTimeout(function() {
@@ -105,8 +107,10 @@ var Table = Marionette.CompositeView.extend({
                 "posted_date__gte": data.fromDate,
                 "posted_date__lte": data.toDate
             });
+            self.ui.queryThemes.hide();
             this.collection.fetch({
                 success: function () {
+
                     self.triggerMethod('fetched');
                 },
                 data: self.model.attributes
@@ -117,13 +121,24 @@ var Table = Marionette.CompositeView.extend({
         }
     },
 
-    dispatcher: function(domEvent) {
-        var market = this.$(domEvent.toElement).data("storeId");
-        if (this.model.get('posted_date__gte') && this.model.get('posted_date__lte')) {
-            this.model.set("page", 1);
-            this.model.set("market", market);
+    selectMarket: function(domEvent) {
+        this.$(domEvent.toElement).toggleClass("select");
+        if (this.$(".select").length > 0) {
+            this.ui.queryThemes.show();
+        } else {
+            this.ui.queryThemes.hide();
+        }
+    },
 
-            this.model.set('history', 'theme-company-rating/' + this.model.get("market") + "/" +
+    queryThemes: function (e) {
+        var self = this;
+        var markets = [];
+        this.$(".select").each(function(i, item) {markets.push(self.$(item).data("storeId"));});
+        if (markets.length > 0 && this.model.get('posted_date__gte') && this.model.get('posted_date__lte')) {
+            this.model.set("page", 1);
+            this.model.set("market__in", JSON.stringify(markets));
+
+            this.model.set('history', 'theme-company-rating/' + this.model.get("market__in") + "/" +
                                                                 this.model.get('posted_date__gte') + "/" +
                                                                 this.model.get('posted_date__lte'));
             this.triggerMethod('show:theme');
