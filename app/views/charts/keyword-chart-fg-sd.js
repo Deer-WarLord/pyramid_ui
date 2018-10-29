@@ -311,14 +311,14 @@ module.exports = Marionette.CompositeView.extend({
                 .value();
         } else {
             result = {};
+            keys = _.values(sdMap[sdKey]);
+
+            _.each(keys, function(el){
+                result[el] = [];
+            });
+
 
             if (url.includes("-fg-")) {
-                var keys = _.keys(sdMap[sdKey]);
-
-                _.each(keys, function(el){
-                    result[el] = [];
-                });
-
                 _.each(data, function (el_i) {
                     _.each(keys, function (el_j) {
                         var views = el_i[sdKey][el_j];
@@ -327,16 +327,12 @@ module.exports = Marionette.CompositeView.extend({
                     })
                 });
             } else {
-                keys = _.values(sdMap[sdKey]);
-
-                _.each(keys, function(el){
-                    result[el] = [];
-                });
-
                 _.each(data, function (el_i) {
-                    result[sdMap[sdKey][el_i[sdKey]]].push([self.gt.apply(self, el_i.date.split("-")), el_i.views]);
+                    _.each(keys, function (el_j_v, el_j_k) {
+                        var views = el_i[sdKey][el_j_k];
+                        result[el_j_v].push([self.gt.apply(self, el_i.date.split("-")), views]);
+                    })
                 });
-
             }
 
             result = _.chain(result).mapObject(function(val, key) {
