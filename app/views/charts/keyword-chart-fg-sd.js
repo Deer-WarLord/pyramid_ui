@@ -147,6 +147,37 @@ var ADMIXER_SD_MAP = {
     }
 };
 
+var fgListTmpl = "<div class=\"control-inline toolbar-item-group sd-chart-list\">\n" +
+    "<select class=\"sd-list\" name=\"sdList\">\n" +
+        "<option value=\"sex\">Пол</option>\n" +
+        "<option value=\"age\">Возраст</option>\n" +
+        "<option value=\"education\">Образование</option>\n" +
+        "<option value=\"children_lt_16\">Дети младше 16</option>\n" +
+        "<option value=\"marital_status\">Семейный статус</option>\n" +
+        "<option value=\"occupation\">Род занятий</option>\n" +
+        "<option value=\"group\">Групп населения</option>\n" +
+        "<option value=\"income\">Доход</option>\n" +
+        "<option value=\"region\">Регион</option>\n" +
+        "<option value=\"typeNP\">ТипНП</option>\n" +
+    "</select>\n" +
+    "<input class=\"sd-list-query\" type=\"hidden\"/>\n" +
+"</div>";
+
+var admixerListTmpl = "<div class=\"control-inline toolbar-item-group sd-chart-list\">\n" +
+    "<select class=\"sd-list\" name=\"sdList\">\n" +
+        "<option value=\"platform\">Платформа</option>\n" +
+        "<option value=\"browser\">Браузер</option>\n" +
+        "<option value=\"age\">Возраст</option>\n" +
+        "<option value=\"gender\">Гендер</option>\n" +
+        "<!--<option value=\"region\">Регион</option>-->\n" +
+        "<!--<option value=\"income\">Групп населения</option>-->\n" +
+    "</select>\n" +
+    "<input class=\"sd-list-query\" type=\"hidden\"/>\n" +
+"</div>";
+
+
+
+
 
 var marketsTmpl = _.template(
     '<% for(var i in collection) { %>\n' +
@@ -465,14 +496,15 @@ module.exports = Marionette.CompositeView.extend({
 
             if (url.length > 0) {
                 this.model.set("url", url[0]);
-                var hideClass = (url[0].includes("-fg-")) ? ".admixer-sd" : ".fg-sd";
+                var listTemplate = (url[0].includes("-fg-")) ? fgListTmpl : admixerListTmpl;
             } else {
                 return false;
             }
 
-            this.ui.dynamicChart = this.$(event.target).parents(".wizard-wrapper").find(".demo-vertical-bar-chart");
-            this.$(event.target).parents(".wizard-wrapper").find(".sd-chart-title").html(JSON.parse(this.model.get("key_word__in")).join());
-            $wrapper.find(hideClass).hide();
+            this.ui.dynamicChart = $wrapper.find(".demo-vertical-bar-chart");
+            $wrapper.find(".sd-chart-title").html(JSON.parse(this.model.get("key_word__in")).join());
+            $wrapper.find(".sd-chart-list").html(listTemplate);
+            this.triggerMethod('fetched');
             this.triggerMethod("updateDateControls", $wrapper.find(".time-range"), $wrapper.find(".time-range input"), this.options);
             this.query();
             $btnNext.hide();
