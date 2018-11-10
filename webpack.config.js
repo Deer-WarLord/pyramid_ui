@@ -38,7 +38,7 @@ module.exports = {
     ]
   },
   output: {
-    path: __dirname + '/../mainapp/mainapp/static/js',
+    path: __dirname + '/../pyramid-backend/mainapp/static/js',
     filename: 'app.js'
   },
   plugins: [
