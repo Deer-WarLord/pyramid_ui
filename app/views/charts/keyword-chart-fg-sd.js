@@ -342,24 +342,25 @@ module.exports = Marionette.CompositeView.extend({
                 .value();
         } else {
             result = {};
-            keys = _.values(sdMap[sdKey]);
+            var key_words = JSON.parse(this.model.get("key_word__in"));
 
-            _.each(keys, function(el){
-                result[el] = [];
+            _.each(key_words, function(key_word) {
+                _.each(_.values(sdMap[sdKey]), function(el){
+                    result[el] = [];
+                });
             });
-
 
             if (url.includes("-fg-")) {
                 _.each(data, function (el_i) {
-                    _.each(keys, function (el_j) {
-                        var views = el_i[sdKey][el_j];
+                    _.each(sdMap[sdKey], function (el_j_v, el_j_k) {
+                        var views = el_i[sdKey][el_j_k];
                         views = (views !== undefined) ? views/100.0 * el_i.views : 0;
-                        result[el_j].push([self.gt.apply(self, el_i.date.split("-")), views]);
+                        result[el_j_v].push([self.gt.apply(self, el_i.date.split("-")), views]);
                     })
                 });
             } else {
                 _.each(data, function (el_i) {
-                    _.each(keys, function (el_j_v, el_j_k) {
+                    _.each(sdMap[sdKey], function (el_j_v, el_j_k) {
                         var views = el_i[sdKey][el_j_k];
                         result[el_j_v].push([self.gt.apply(self, el_i.date.split("-")), views]);
                     })
@@ -421,7 +422,6 @@ module.exports = Marionette.CompositeView.extend({
                 content: '%s: %y'
             }
         };
-        console.log(data);
         try {
             $.plot(this.ui.dynamicChart, data, config);
         } catch (err) {
