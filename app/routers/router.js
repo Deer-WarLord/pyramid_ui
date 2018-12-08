@@ -13,8 +13,20 @@ module.exports = Marionette.AppRouter.extend({
         'theme-company-rating/': 'themeCompanyRatingAll',
         'theme-company-rating/:market/:fromDate/:toDate': 'themeCompanyRatingFilter',
 
+        'region-rating/': 'regionRatingAll',
+        'region-rating/:fromDate/:toDate': 'regionRatingFilter',
+
+        'publication-type-rating/': 'publicationTypeRatingAll',
+        'publication-type-rating/:region__in/:fromDate/:toDate': 'publicationTypeRatingFilter',
+
+        'publication-topic-rating/': 'publicationTopicRatingAll',
+        'publication-topic-rating/:region__in/:type__in/:fromDate/:toDate': 'publicationTopicRatingFilter',
+
         'publication-rating/': 'publicationRatingAll',
+        'publication-rating/:region/:type/:topic/:fromDate/:toDate': 'publicationRatingFilterTopic',
         'publication-rating/:fromDate/:toDate(/:key_word)': 'publicationRatingFilter',
+
+
         'specific-social-demo-rating-admixer/:fromDate/:toDate/:key_word(/:publication)': "specificSocialDemoRatingAdmixer",
         'specific-social-demo-rating-fg/:fromDate/:toDate/:key_word(/:publication)': "specificSocialDemoRatingFg",
 

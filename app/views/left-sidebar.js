@@ -16,6 +16,7 @@ module.exports = Marionette.ItemView.extend({
     ui: {
         "main_menu": ".main-menu",
         "markets_query": "#markets-query",
+        "region_query": "#region-query",
         "publications_query": "#publications-query",
         "publications_social_demo_query_admixer": "#publications-social-demo-query-admixer",
         "themes_social_demo_query_admixer": "#themes-social-demo-query-admixer",
@@ -33,6 +34,7 @@ module.exports = Marionette.ItemView.extend({
     events: {
         'click .js-sub-menu-toggle': "subMenuToggle",
         'click @ui.markets_query': 'marketsQuery',
+        'click @ui.region_query': 'regionQuery',
         'click @ui.publications_query': 'publicationsQuery',
         'click @ui.publications_social_demo_query_admixer': 'publicationsSocialDemoQueryAdmixer',
         'click @ui.themes_social_demo_query_admixer': 'themesSocialDemoQueryAdmixer',
@@ -78,6 +80,17 @@ module.exports = Marionette.ItemView.extend({
         this.model.clear();
         this.model.set("history", "market-rating/");
         this.triggerMethod('show:market');
+    },
+
+    activateRegionQuery: function () {
+        this.ui.main_menu.find("li.active").removeClass("active");
+        this.ui.region_query.parents("li").addClass("active");
+    },
+
+    regionQuery: function () {
+        this.model.clear();
+        this.model.set("history", "region-rating/");
+        this.triggerMethod('show:region');
     },
 
     activatePublicationsQuery: function () {

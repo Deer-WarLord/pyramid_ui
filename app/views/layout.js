@@ -4,6 +4,9 @@ var TopBar = require("./top-bar");
 var LeftSidebar = require("./left-sidebar");
 var MarketRating = require('./market_rating/table');
 var ThemeCompanyRating = require('./theme_company_rating/table');
+var RegionRating = require('./region_rating/table');
+var PublicationTypeRating = require('./publication_type_rating/table');
+var PublicationTopicRating = require('./publication_topic_rating/table');
 var PublicationRating = require('./publication_rating/table');
 var SocialDemoRatingAdmixer = require('./social_demo_rating/table_admixer');
 var SocialDemoRatingFG = require('./social_demo_rating/table_fg');
@@ -35,6 +38,9 @@ module.exports = Marionette.LayoutView.extend({
         left_sidebar: "#left-sidebar",
         market_rating_table: '#market-rating',
         theme_company_rating_table: '#theme-company-rating',
+        region_rating_table: '#region-rating',
+        publication_type_rating_table: '#publication-type-rating',
+        publication_topic_rating_table: '#publication-topic-rating',
         publication_rating_table: '#publication-rating',
         specific_social_demo_rating_table: '#specific-social-demo-rating',
         general_social_demo_rating_table: '#general-social-demo-rating-table',
@@ -49,7 +55,14 @@ module.exports = Marionette.LayoutView.extend({
 
     childEvents: {
         'show:market': 'onShowMarket',
+        'show:market:dates': 'onShowMarketDates',
         'show:theme': 'onShowTheme',
+        'show:region': 'onShowRegion',
+        'show:region:dates': 'onShowRegionDates',
+        'show:publication:type': 'onShowPublicationType',
+        'show:publication:type:dates': 'onShowPublicationTypeDates',
+        'show:publication:topic': 'onShowPublicationTopic',
+        'show:publication:topic:dates': 'onShowPublicationTopicDates',
         'show:theme:dates': 'onShowThemeDates',
         'show:publications': 'onShowPublications',
         'query:change': 'onQueryChange',
@@ -159,10 +172,97 @@ module.exports = Marionette.LayoutView.extend({
         }
     },
 
+    onShowRegion: function () {
+        if (this.initialData.permissions.publication) {
+            this.showBars();
+            this.left_sidebar.currentView.activateRegionQuery();
+            this.showChildView('region_rating_table', new RegionRating({
+                model: this.model,
+                permissions: this.initialData.permissions,
+                fixed_dates: this.initialData.dates
+            }));
+        }
+    },
+
+    onShowRegionDates: function(dates) {
+        if (this.initialData.permissions.publication && this.initialData.permissions.free_time) {
+            this.model.set({
+                "posted_date__gte": dates[0],
+                "posted_date__lte": dates[1]
+            });
+            this.showBars();
+            this.left_sidebar.currentView.activateRegionQuery();
+            this.showChildView('region_rating_table', new RegionRating({
+                model: this.model,
+                permissions: this.initialData.permissions,
+                fixed_dates: this.initialData.dates
+            }), dates);
+        }
+    },
+
+    onShowPublicationType: function () {
+        if (this.initialData.permissions.publication) {
+            this.showBars();
+            this.left_sidebar.currentView.activateRegionQuery();
+            this.showChildView('publication_type_rating_table', new PublicationTypeRating({
+                model: this.model,
+                permissions: this.initialData.permissions,
+                fixed_dates: this.initialData.dates
+            }));
+        }
+    },
+
+    onShowPublicationTypeDates: function(params) {
+        if (this.initialData.permissions.publication && this.initialData.permissions.free_time) {
+            this.model.set({
+                "posted_date__gte": params[0],
+                "posted_date__lte": params[1],
+                "region__in": params[2]
+            });
+            this.showBars();
+            this.left_sidebar.currentView.activateRegionQuery();
+            this.showChildView('publication_type_rating_table', new PublicationTypeRating({
+                model: this.model,
+                permissions: this.initialData.permissions,
+                fixed_dates: this.initialData.dates
+            }), params);
+        }
+    },
+
+    onShowPublicationTopic: function () {
+        if (this.initialData.permissions.publication) {
+            this.showBars();
+            this.left_sidebar.currentView.activateRegionQuery();
+            this.showChildView('publication_topic_rating_table', new PublicationTopicRating({
+                model: this.model,
+                permissions: this.initialData.permissions,
+                fixed_dates: this.initialData.dates
+            }));
+        }
+    },
+
+    onShowPublicationTopicDates: function(params) {
+        if (this.initialData.permissions.publication && this.initialData.permissions.free_time) {
+            this.model.set({
+                "posted_date__gte": params[0],
+                "posted_date__lte": params[1],
+                "region__in": params[2],
+                "type__in": params[3]
+            });
+            this.showBars();
+            this.left_sidebar.currentView.activateRegionQuery();
+            this.showChildView('publication_topic_rating_table', new PublicationTopicRating({
+                model: this.model,
+                permissions: this.initialData.permissions,
+                fixed_dates: this.initialData.dates
+            }), params);
+        }
+    },
+
     onShowPublications: function () {
         if (this.initialData.permissions.publication) {
             this.showBars();
-            this.left_sidebar.currentView.activatePublicationsQuery();
+            this.left_sidebar.currentView.activateRegionQuery();
             this.showChildView('publication_rating_table', new PublicationRating({
                 model: this.model,
                 permissions: this.initialData.permissions,

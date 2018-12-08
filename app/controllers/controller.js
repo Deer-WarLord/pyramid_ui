@@ -49,13 +49,55 @@ module.exports = Marionette.Controller.extend({
             this.getOption('layout').triggerMethod('show:theme');
         }
     },
-    
+
     themeCompanyRatingFilter: function(market, fromDate, toDate) {
         if (this.permissions.theme) {
             this.getOption('layout').triggerMethod('show:theme:dates', [fromDate, toDate, market]);
         }
     },
-    
+
+    regionRatingAll: function() {
+        if (this.permissions.publication) {
+            this.getOption('layout').model.clear();
+            this.getOption('layout').triggerMethod('show:region');
+        }
+    },
+
+    regionRatingFilter: function(fromDate, toDate) {
+        if (this.permissions.publication) {
+            this.getOption('layout').model.clear();
+            this.getOption('layout').triggerMethod('show:region:dates', [fromDate, toDate]);
+        }
+    },
+
+    publicationTypeRatingAll: function() {
+        if (this.permissions.publication) {
+            this.getOption('layout').model.clear();
+            this.getOption('layout').triggerMethod('show:publication:type');
+        }
+    },
+
+    publicationTypeRatingFilter: function(region__in, fromDate, toDate) {
+        if (this.permissions.publication) {
+            this.getOption('layout').model.clear();
+            this.getOption('layout').triggerMethod('show:publication:type:dates', [fromDate, toDate, region__in]);
+        }
+    },
+
+    publicationTopicRatingAll: function() {
+        if (this.permissions.publication) {
+            this.getOption('layout').model.clear();
+            this.getOption('layout').triggerMethod('show:publication:topic');
+        }
+    },
+
+    publicationTopicRatingFilter: function(region__in, type__in, fromDate, toDate) {
+        if (this.permissions.publication) {
+            this.getOption('layout').model.clear();
+            this.getOption('layout').triggerMethod('show:publication:topic:dates', [fromDate, toDate, region__in, type__in]);
+        }
+    },
+
     publicationRatingAll: function() {
         if (this.permissions.publication) {
             this.getOption('layout').model.clear();
@@ -73,6 +115,21 @@ module.exports = Marionette.Controller.extend({
             if (key_word) {
                 this.getOption('layout').model.set("key_word__in", key_word);
             }
+
+            this.getOption('layout').triggerMethod('show:publications');
+        }
+    },
+
+    publicationRatingFilterTopic: function(region, type, topic, fromDate, toDate) {
+        if (this.permissions.publication) {
+            this.getOption('layout').model.clear();
+            this.getOption('layout').model.set({
+                "posted_date__gte": fromDate,
+                "posted_date__lte": toDate,
+                "region__in": region,
+                "type__in": type,
+                "topic__in": topic
+            });
 
             this.getOption('layout').triggerMethod('show:publications');
         }

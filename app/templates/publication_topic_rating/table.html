@@ -1,0 +1,41 @@
+<div class="widget widget-table">
+    <div class="widget-header">
+        <h3><i class="fa fa-table"></i> Информация по видам СМИ</h3>
+        <div class="btn-group widget-header-toolbar">
+            <a href="#" title="Expand/Collapse" class="btn-borderless btn-toggle-expand"><i class="fa fa-chevron-up"></i></a>
+        </div>
+    </div>
+    <div class="widget-content">
+        <div class="alert alert-info fade in">
+            <button class="close" data-dismiss="alert">&times;</button>
+            <i class="fa fa-info-circle"></i> выберити интересующий вас вид СМИ
+        </div>
+
+        <div class="col-sm-4">
+            <button type="button" id="query-publication" class="btn btn-default">Перейти далее</button>
+        </div>
+
+        <div id="publication-topic-reportrange" class="pull-right report-range">
+            <i class="fa fa-calendar"></i>
+            <span class="range-value"></span><b class="caret"></b>
+            <input type="hidden"/>
+        </div>
+
+        <table id="datatable-publication-topic" class="table table-sorting table-hover table-bordered datatable">
+            <thead>
+            <tr class="row-filter">
+                <th data-index="0"><input type="text" class="form-control input-sm" placeholder="Search..."></th>
+                <th data-index="1"></th>
+            </tr>
+            <tr>
+                <th>Вид СМИ</th>
+                <th>Число публикаций</th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <div class="row paginator"></div>
+    </div>
+</div>
+
