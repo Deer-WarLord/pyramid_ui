@@ -76,6 +76,7 @@ var Table = Marionette.CompositeView.extend({
         },
         ToggleBehavior: {},
         ExportBehavior: {},
+        BreadCrumbBehavior: {},
         jQueryBehavior: {
             '@ui.selectProvider': {
                 'multiselect': {
@@ -109,6 +110,7 @@ var Table = Marionette.CompositeView.extend({
             },
             data: this.model.attributes
         });
+        this.triggerMethod('addBreadcrumb', {"url": this.history, "title": "Публикации", "lvl": 3});
     },
 
     filterColumn: function (event) {

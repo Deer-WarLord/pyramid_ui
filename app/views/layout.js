@@ -82,6 +82,10 @@ module.exports = Marionette.LayoutView.extend({
         'show:admin:files': 'onShowAdminFiles'
     },
 
+    behaviors: {
+        BreadCrumbBehavior: {}
+    },
+
     onQueryChange: function (data) {
       this.model.set(data);
     },
@@ -221,6 +225,7 @@ module.exports = Marionette.LayoutView.extend({
             });
             this.showBars();
             this.left_sidebar.currentView.activateRegionQuery();
+            this.triggerMethod('initBreadcrumb');
             this.showChildView('publication_type_rating_table', new PublicationTypeRating({
                 model: this.model,
                 permissions: this.initialData.permissions,

@@ -59,6 +59,7 @@ var Table = Marionette.CompositeView.extend({
         },
         ToggleBehavior: {},
         ExportBehavior: {},
+        BreadCrumbBehavior: {},
         DatePickerBehavior: {}
     },
 
@@ -86,8 +87,8 @@ var Table = Marionette.CompositeView.extend({
         });
 
         this.ui.reportRange.find('span').html(dates[0] + ' - ' + dates[1]);
-        this.ui.reportRange.find('input').val(dates[0] + ',' + dates[1])
-
+        this.ui.reportRange.find('input').val(dates[0] + ',' + dates[1]);
+        this.triggerMethod('addBreadcrumb', {"url": this.history, "title": "Регионы", "lvl": 0});
     },
 
     filterColumn: function (event) {

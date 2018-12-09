@@ -195,6 +195,11 @@ var Table = Marionette.CompositeView.extend({
             this.history = this.model.get("history");
             this.model.unset("history");
         }
+        this.lvl = 3;
+        if (this.model.has("lvl")) {
+            this.lvl = this.model.get("lvl");
+            this.model.unset("lvl");
+        }
         this.childViewOptions = options.model;
 
         if (!this.options.permissions.free_time || !this.model.get("posted_date__gte")) {
@@ -248,6 +253,7 @@ var Table = Marionette.CompositeView.extend({
         },
         ToggleBehavior: {},
         ExportBehavior: {},
+        BreadCrumbBehavior: {},
         DatePickerBehavior: {}
     },
 
@@ -272,6 +278,7 @@ var Table = Marionette.CompositeView.extend({
             },
             data: this.model.attributes
         });
+        this.triggerMethod('addBreadcrumb', {"url": this.history, "title": "Соц.Дем.Factum", "lvl": this.lvl});
     },
 
     filterColumn: function (event) {

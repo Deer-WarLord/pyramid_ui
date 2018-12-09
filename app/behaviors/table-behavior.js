@@ -4,7 +4,7 @@ var PaginationView = require("../views/pagination");
 module.exports = Marionette.Behavior.extend({
 
     events: {
-        'click .paginate_button a': 'renderPage',
+        'click .paginate_button a': 'renderPage'
     },
 
     onFetched: function() {

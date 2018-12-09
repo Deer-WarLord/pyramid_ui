@@ -78,8 +78,9 @@ module.exports = Marionette.ItemView.extend({
 
     marketsQuery: function () {
         this.model.clear();
-        this.model.set("history", "market-rating/");
+        Backbone.history.navigate('market-rating/');
         this.triggerMethod('show:market');
+        return false;
     },
 
     activateRegionQuery: function () {
@@ -89,8 +90,9 @@ module.exports = Marionette.ItemView.extend({
 
     regionQuery: function () {
         this.model.clear();
-        this.model.set("history", "region-rating/");
+        Backbone.history.navigate('region-rating/');
         this.triggerMethod('show:region');
+        return false;
     },
 
     activatePublicationsQuery: function () {
@@ -113,6 +115,7 @@ module.exports = Marionette.ItemView.extend({
         this.activatePublicationsSocialDemoQueryAdmixer();
         this.model.clear();
         this.model.set("history", "general-social-demo-rating-by-publication-admixer");
+        this.model.set("lvl", 0);
         this.triggerMethod('general:show:social:demo:admixer', "publication");
     },
 
@@ -124,6 +127,7 @@ module.exports = Marionette.ItemView.extend({
     themesSocialDemoQueryAdmixer: function () {
         this.activateThemesSocialDemoQueryAdmixer();
         this.model.clear();
+        this.model.set("lvl", 0);
         this.model.set("history", "general-social-demo-rating-by-theme-admixer");
         this.triggerMethod('general:show:social:demo:admixer', "key_word");
     },
@@ -136,6 +140,7 @@ module.exports = Marionette.ItemView.extend({
     publicationsSocialDemoQueryFg: function () {
         this.activatePublicationsSocialDemoQueryFg();
         this.model.clear();
+        this.model.set("lvl", 0);
         this.model.set("history", "general-social-demo-rating-by-publication-fg");
         this.triggerMethod('general:show:social:demo:fg', "publication");
     },
@@ -148,6 +153,7 @@ module.exports = Marionette.ItemView.extend({
     themesSocialDemoQueryFg: function () {
         this.activateThemesSocialDemoQueryFg();
         this.model.clear();
+        this.model.set("lvl", 0);
         this.model.set("history", "general-social-demo-rating-by-theme-fg");
         this.triggerMethod('general:show:social:demo:fg', "key_word");
     },

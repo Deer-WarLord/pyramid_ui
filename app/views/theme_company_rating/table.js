@@ -61,6 +61,7 @@ var Table = Marionette.CompositeView.extend({
         },
         ToggleBehavior: {},
         ExportBehavior: {},
+        BreadCrumbBehavior: {},
         jQueryBehavior: {
             '@ui.selectQuery': {
                 'multiselect': {
@@ -115,8 +116,8 @@ var Table = Marionette.CompositeView.extend({
         });
 
         this.ui.reportRange.find('span').html(dates[0] + ' - ' + dates[1]);
-        this.ui.reportRange.find('input').val(dates[0] + ',' + dates[1])
-
+        this.ui.reportRange.find('input').val(dates[0] + ',' + dates[1]);
+        this.triggerMethod('addBreadcrumb', {"url": this.history, "title": "Темы/Компании", "lvl": 1});
     },
 
     filterColumn: function (event) {
