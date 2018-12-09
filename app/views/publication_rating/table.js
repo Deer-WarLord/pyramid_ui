@@ -47,12 +47,14 @@ var Table = Marionette.CompositeView.extend({
         "publication": ".publication",
         "publicationList": ".publication-list",
         "selectProvider": "#publication-provider-type",
-        "modalDialog": "#myModal"
+        "modalDialog": "#myModal",
+        "querySd": "#query-sd"
     },
 
     events: {
         'keyup @ui.rowFilter': 'filterColumn',
-        'click @ui.publication': 'getSocialDemo',
+        'click @ui.publication': 'selectPublication',
+        'click @ui.querySd': 'querySd',
         'click @ui.publicationList': 'getPublicationList',
         'change @ui.input': 'filterCollection',
         'hidden.bs.modal @ui.modalDialog': 'onHideModal'
@@ -93,6 +95,7 @@ var Table = Marionette.CompositeView.extend({
         self.$el.parent().show();
         this.ui.table.DataTable().destroy();
         var reportRange = $(Object.getPrototypeOf(this).ui.reportRange);
+        this.ui.querySd.hide();
         this.collection.fetch({
             success: function() {
                 if (self.history) {
@@ -132,6 +135,7 @@ var Table = Marionette.CompositeView.extend({
                 "posted_date__gte": data.fromDate,
                 "posted_date__lte": data.toDate
             });
+            this.ui.querySd.hide();
             this.collection.fetch({
                 success: function() {
                     self.$('.publication, .publication-list').tooltip();
@@ -145,17 +149,31 @@ var Table = Marionette.CompositeView.extend({
         }
     },
 
-    getSocialDemo: function(domEvent) {
-        this.model.set("publication", domEvent.toElement.innerHTML);
+    selectPublication: function(domEvent) {
+        this.$(domEvent.toElement).toggleClass("select");
+        if (this.$(".select").length > 0) {
+            this.ui.querySd.show();
+        } else {
+            this.ui.querySd.hide();
+        }
+    },
+
+    querySd: function(domEvent) {
         this.model.set("page", 1);
         var params = "";
+
+        var self = this;
+        var publications = [];
+        this.$(".select").each(function(i, item) {publications.push(self.$(item).text());});
+
+        this.model.set("publication__in", JSON.stringify(publications));
 
         if (this.model.isValidForPublications()) {
 
             params = this.model.get('posted_date__gte')+"/"+
                      this.model.get('posted_date__lte')+"/"+
                      this.model.get("key_word__in")+"/"+
-                    this.model.get("publication");
+                     this.model.get("publication__in");
 
             if (this.ui.selectProvider.val() === "admixer") {
                 var history = 'specific-social-demo-rating-admixer/' + params;
@@ -164,11 +182,11 @@ var Table = Marionette.CompositeView.extend({
                 history = 'specific-social-demo-rating-fg/' + params;
             }
 
-        } else {
+        } else if (publications.length > 0) {
 
             params = this.model.get('posted_date__gte')+"/"+
                      this.model.get('posted_date__lte')+"/"+
-                     this.model.get("publication");
+                     this.model.get("publication__in");
 
             if (this.ui.selectProvider.val() === "admixer") {
                 history = 'general-social-demo-rating-admixer/' + params;

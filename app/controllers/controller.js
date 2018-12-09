@@ -141,6 +141,7 @@ module.exports = Marionette.Controller.extend({
 
     specificSocialDemoRatingAdmixer: function(fromDate, toDate, key_word, publication) {
         if (this.permissions.social_demo) {
+            this.getOption('layout').model.clear();
             this.getOption('layout').model.set({
                 "posted_date__gte": fromDate,
                 "posted_date__lte": toDate,
@@ -148,7 +149,7 @@ module.exports = Marionette.Controller.extend({
             });
 
             if (publication) {
-                this.getOption('layout').model.set("publication", publication);
+                this.getOption('layout').model.set("publication__in", publication);
             }
 
             this.getOption('layout').triggerMethod('specific:show:social:demo:admixer');
@@ -157,6 +158,7 @@ module.exports = Marionette.Controller.extend({
 
     specificSocialDemoRatingFg: function(fromDate, toDate, key_word, publication){
         if (this.permissions.social_demo) {
+            this.getOption('layout').model.clear();
             this.getOption('layout').model.set({
                 "posted_date__gte": fromDate,
                 "posted_date__lte": toDate,
@@ -164,7 +166,7 @@ module.exports = Marionette.Controller.extend({
             });
 
             if (publication) {
-                this.getOption('layout').model.set("publication", publication);
+                this.getOption('layout').model.set("publication__in", publication);
             }
 
             this.getOption('layout').triggerMethod('specific:show:social:demo:fg');
