@@ -162,6 +162,7 @@ var Table = Marionette.CompositeView.extend({
         },
         PlotBehavior: {},
         ToggleBehavior: {},
+        ExportBehavior: {},
         DatePickerBehavior: {}
     },
 

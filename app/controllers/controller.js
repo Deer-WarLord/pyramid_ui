@@ -7,6 +7,7 @@ var jQueryBehavior = require('../behaviors/jquery-behavior');
 var jQueryBehaviorOnFetch = require('../behaviors/jquery-behavior-onfetch');
 var TableBehavior = require('../behaviors/table-behavior');
 var ToggleBehavior = require('../behaviors/toggle-behavior');
+var ExportBehavior = require('../behaviors/export-behavior');
 var PlotBehavior = require('../behaviors/plot-behavior');
 
 Marionette.Behaviors.behaviorsLookup = function() {
@@ -16,6 +17,7 @@ Marionette.Behaviors.behaviorsLookup = function() {
         "jQueryBehavior": jQueryBehavior,
         "jQueryBehaviorOnFetch": jQueryBehaviorOnFetch,
         "ToggleBehavior": ToggleBehavior,
+        "ExportBehavior": ExportBehavior,
         "TableBehavior": TableBehavior
     };
 };

@@ -75,6 +75,7 @@ var Table = Marionette.CompositeView.extend({
             }
         },
         ToggleBehavior: {},
+        ExportBehavior: {},
         jQueryBehavior: {
             '@ui.selectProvider': {
                 'multiselect': {
