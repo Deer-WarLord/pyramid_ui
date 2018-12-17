@@ -39,12 +39,19 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="title" class="col-sm-3 control-label">Ссылка</label>
+                        <label for="url" class="col-sm-3 control-label">Ссылка</label>
                         <div class="col-sm-9">
                             <input type="text" class="form-control" name="url" id="url" placeholder="http://">
                             <ul class="parsley-errors-list filled">
                                 <li class="parsley-required"></li>
                             </ul>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="send_to_provider" class="col-sm-3 control-label">Отправить провайдеру</label>
+                        <div class="col-sm-9">
+                            <input id="send_to_provider" name="send_to_provider" type="checkbox" checked class="switch" data-on-label="YES" data-off-label="NO" />
                         </div>
                     </div>
 
