@@ -10,6 +10,7 @@ require("../assets/js/plugins/datatable/dataTables.bootstrap");
 require("../assets/js/plugins/bootstrap-datepicker/bootstrap-datepicker");
 require("../assets/js/plugins/daterangepicker/daterangepicker");
 require("../assets/js/plugins/bootstrap-multiselect/bootstrap-multiselect");
+require("../assets/js/plugins/bootstrap-switch/bootstrap-switch.min");
 require("../assets/js/plugins/stat/flot/jquery.flot.min");
 // require("../assets/js/plugins/stat/flot/jquery.flot.resize.min");
 require("../assets/js/plugins/select2/select2.min");

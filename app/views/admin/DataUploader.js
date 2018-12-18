@@ -25,11 +25,11 @@ module.exports = Marionette.ItemView.extend({
         "file": "#file",
         "submit": "#submit-data",
         "form": "#data-uploader-form",
-        "alert": ".alert"
+        "alert": ".alert",
+        "switch": ".switch"
     },
-
     events: {
-        "submit form": "submitData",
+        "submit form": "submitData"
     },
 
     behaviors: {
@@ -40,8 +40,15 @@ module.exports = Marionette.ItemView.extend({
                     buttonClass: 'btn btn-default selectProvider'
                 }
             },
+            '@ui.switch': {
+                'bootstrapSwitch': {}
+            }
         }
     },
+
+    // $('.switch-radio-demo').on('switch-change', function () {
+    //     $('.switch-radio-demo').bootstrapSwitch('toggleRadioState');
+    // });
 
     submitData: function (e) {
 
