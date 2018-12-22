@@ -216,7 +216,8 @@ var Table = Marionette.CompositeView.extend({
                     paging: false,
                     columns: [
                         { data: 'title' },
-                        { data: 'posted_date' }
+                        { data: 'posted_date' },
+                        { data: 'count' }
                     ]
                 });
                 self.$("#myModalLabel").html(publication);
