@@ -146,7 +146,8 @@ var Table = Marionette.CompositeView.extend({
         "reportRange": "#admixer-reportrange",
         "input": "#admixer-reportrange input",
         "rowFilter": "#admixer-datatable-social-demo .row-filter input",
-        "table": "#admixer-datatable-social-demo"
+        "table": "#admixer-datatable-social-demo",
+        "socialDemoDialog": "#admixer-social-demo-plot"
     },
 
     events: {

@@ -227,7 +227,8 @@ var Table = Marionette.CompositeView.extend({
         "reportRange": "#fg-reportrange",
         "input": "#fg-reportrange input",
         "rowFilter": "#fg-datatable-social-demo_wrapper .row-filter input",
-        "table": "#fg-datatable-social-demo"
+        "table": "#fg-datatable-social-demo",
+        "socialDemoDialog": "#fg-social-demo-plot"
     },
 
     events: {
@@ -251,6 +252,7 @@ var Table = Marionette.CompositeView.extend({
                 }
             }
         },
+        PlotBehavior: {},
         ToggleBehavior: {},
         ExportBehavior: {},
         BreadCrumbBehavior: {},
