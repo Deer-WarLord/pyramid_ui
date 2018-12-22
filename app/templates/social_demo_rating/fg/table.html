@@ -32,7 +32,7 @@
                     <th data-index="10"></th>
                     <th data-index="11"></th>
                 </tr>
-                <tr>
+                <tr class="row-headers">
                     <% if (typeof(key_word__in) !== "undefined") { %><th>Темы/Компании</th><% } %>
                     <% if (typeof(aggregator) !== "undefined" && aggregator === "key_word") { %><th>Темы/Компании</th><% } %>
                     <% if (typeof(aggregator) !== "undefined" && aggregator === "publication") { %><th>СМИ</th><% } %>
@@ -54,12 +54,19 @@
         <div class="modal fade" id="fg-social-demo-plot">
             <div class="modal-dialog">
                 <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title">Соц.дем</h4>
+                    </div>
                     <div class="modal-body">
                         <div class="widget widget-quick-note quick-note-edit">
                             <div class="widget-content">
                                 <div class="donut-chart"></div>
                             </div>
                         </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default gist-donut" data-key="donut">Гистограмма</button>
                     </div>
                 </div>
             </div>
