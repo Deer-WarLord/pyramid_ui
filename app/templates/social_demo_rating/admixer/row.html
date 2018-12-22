@@ -5,9 +5,9 @@
 <td>
     <table class="social-demo-item">
         <% _.mapObject(getAgesGroup(age_groups), function(val, key) { %>
-            <tr data-role="<%- key %>" data-index="<%- val %>">
-                <td><span class="badge element-bg-color-blue"><%- key %></span></td>
-                <td><span class="badge element-bg-color-seagreen"><%- val %></span></td>
+            <tr class="sd-item-row" data-role="<%- key %>" data-index="<%- val %>">
+                <td><span class="label label-info"><%- key %></span></td>
+                <td><span class="label label-primary"><%- val %></span></td>
             </tr>
         <% }) %>
     </table>
@@ -15,9 +15,9 @@
 <td>
     <table class="social-demo-item">
         <% _.mapObject(getGendersGroup(gender_groups), function(val, key) { %>
-        <tr data-role="<%- key %>" data-index="<%- val %>">
-            <td><span class="badge element-bg-color-blue"><%- key %></span></td>
-            <td><span class="badge element-bg-color-seagreen"><%- val %></span></td>
+        <tr class="sd-item-row" data-role="<%- key %>" data-index="<%- val %>">
+            <td><span class="label label-info"><%- key %></span></td>
+            <td><span class="label label-primary"><%- val %></span></td>
         </tr>
         <% }) %>
     </table>
@@ -26,9 +26,9 @@
 <td>
     <table class="social-demo-item">
         <% _.mapObject(getPlatformsGroup(platforms), function(val, key) { %>
-        <tr data-role="<%- key %>" data-index="<%- val %>">
-            <td><span class="badge element-bg-color-blue"><%- key %></span></td>
-            <td><span class="badge element-bg-color-seagreen"><%- val %></span></td>
+        <tr class="sd-item-row" data-role="<%- key %>" data-index="<%- val %>">
+            <td><span class="label label-info"><%- key %></span></td>
+            <td><span class="label label-primary"><%- val %></span></td>
         </tr>
         <% }) %>
     </table>
@@ -36,9 +36,9 @@
 <td>
     <table class="social-demo-item">
         <% _.mapObject(getBrowsersGroup(browsers), function(val, key) { %>
-        <tr data-role="<%- key %>" data-index="<%- val %>">
-            <td><span class="badge element-bg-color-blue"><%- key %></span></td>
-            <td><span class="badge element-bg-color-seagreen"><%- val %></span></td>
+        <tr class="sd-item-row" data-role="<%- key %>" data-index="<%- val %>">
+            <td><span class="label label-info"><%- key %></span></td>
+            <td><span class="label label-primary"><%- val %></span></td>
         </tr>
         <% }) %>
     </table>
