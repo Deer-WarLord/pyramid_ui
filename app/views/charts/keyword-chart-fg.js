@@ -2,6 +2,15 @@ var Backbone = require('backbone');
 var Marionette = require('backbone.marionette');
 var Cookies = require('js-cookie');
 
+var marketsTmpl = _.template(
+    '<% for(var i in collection) { %>\n' +
+    '<optgroup label="<%= collection[i].market %>">\n' +
+    '    <% for(var j in collection[i].keywords) { %>\n' +
+    '    <option value="<%= collection[i].keywords[j] %>"><%= collection[i].keywords[j] %></option>\n' +
+    '    <% } %>\n' +
+    '</optgroup>\n' +
+    '<% } %>');
+
 var Themes = Backbone.Collection.extend({
     url: 'charts/themes'
 });
@@ -9,10 +18,10 @@ var Themes = Backbone.Collection.extend({
 
 var ThemeItem = Marionette.ItemView.extend({
     initialize: function() {
-        this.$el.attr("label", this.model.get("market"));
+        this.$el.attr("value", this.model.get("market"));
     },
-    tagName: "optgroup",
-    template: require('../../templates/theme_item_grouped.html')
+    tagName: "option",
+    template: require('../../templates/theme_item.html')
 });
 
 module.exports = Marionette.CompositeView.extend({
@@ -31,29 +40,32 @@ module.exports = Marionette.CompositeView.extend({
     template: require('../../templates/charts/keyword-chart.html'),
 
     childView: ThemeItem,
-    childViewContainer: '#themes-list',
+    childViewContainer: '.markets-selection',
 
     ui: {
-        "dynamicChart": "#demo-vertical-bar-chart",
+        "dynamicChart": ".demo-vertical-bar-chart",
         "donutChart": "#demo-donut-chart",
-        "reportRange": "#time-range",
-        "input": "#time-range input",
-        "themesList": "#themes-list",
-        "inputThemeList": "#theme-list-query"
+        "reportRange": ".time-range",
+        "input": ".time-range input",
+        "selectMarket": ".markets-selection",
+        "selectThemeCompany": "select.themes-selection",
+        "wizard": ".wizard",
+        "wizardNext": ".wizard-wrapper .btn-next",
+        "wizardPrev": ".wizard-wrapper .btn-prev"
     },
 
     behaviors: {
         jQueryBehaviorOnFetch: {
-            '@ui.themesList': {
+            '@ui.selectMarket': {
                 'multiselect': {
-                    maxHeight: 300,
+                    maxHeight: 400,
                     enableFiltering: true,
-                    buttonClass: 'btn btn-default btn-sm themesList',
-                    nonSelectedText: 'Выберите тему',
-                    onChange : function(option, checked) {
-                        this.$select.parent().children("#theme-list-query").trigger("change", [option.val(), checked]);
-                    }
+                    buttonClass: 'btn btn-default btn-sm',
+                    nonSelectedText: 'Рынки'
                 }
+            },
+            '@ui.selectThemeCompany': {
+                "select2": {}
             }
         },
         ToggleBehavior: {},
@@ -61,19 +73,10 @@ module.exports = Marionette.CompositeView.extend({
     },
 
     events: {
-        'change @ui.inputThemeList': 'filterCollection',
-        'change @ui.input': 'filterCollectionDates'
-    },
-
-    filterCollection: function(event, val, isTrue) {
-        var keywords = JSON.parse(this.model.get("key_word__in") || "[]");
-        if (isTrue) {
-            keywords.push(val);
-        } else {
-            keywords = _.without(keywords, val);
-        }
-        this.model.set("key_word__in", JSON.stringify(keywords));
-        this.query();
+        'change @ui.input': 'filterCollectionDates',
+        'change @ui.wizard': "wizardChange",
+        'click @ui.wizardNext': "wizardNext",
+        'click @ui.wizardPrev': "wizardPrev"
     },
 
     filterCollectionDates: function(event, data) {
@@ -241,7 +244,63 @@ module.exports = Marionette.CompositeView.extend({
             },
             data: this.model.attributes
         });
-        self.query();
+    },
+
+    wizardChange: function (e, data) {
+
+        var $wrapper = $(e.target).parents(".wizard-wrapper");
+        var $btnNext = $wrapper.find('.btn-next');
+
+        if((data.step === 1 && data.direction === 'next')) {
+
+            var markets = _.map($wrapper.find('.form1').serializeArray(), function (item) { return item.value; });
+
+            if (markets.length > 0) {
+                var themes = _.filter(this.collection.toJSON(), function (item) { return _.contains(markets, item.market); });
+                $wrapper.find(".themes-selection").html(marketsTmpl({collection: themes}));
+                this.triggerMethod('fetched');
+            } else {
+                return false;
+            }
+
+            $btnNext.show();
+            $btnNext.text(' Построить график').prepend('<i class="fa fa-check-circle"></i>')
+                .removeClass('btn-primary').addClass('btn-success');
+        } else if(data.step === 2 && data.direction === 'next') {
+            themes = _.map($wrapper.find('.form2').serializeArray(), function (item) {
+                return item.value;
+            });
+
+            if (themes.length > 0) {
+                this.model.set("key_word__in", JSON.stringify(themes));
+            } else {
+                return false;
+            }
+
+            this.ui.dynamicChart = $wrapper.find(".demo-vertical-bar-chart");
+            $wrapper.find(".sd-chart-title").html(JSON.parse(this.model.get("key_word__in")).join());
+            this.triggerMethod('fetched');
+            this.triggerMethod("updateDateControls", $wrapper.find(".time-range"), $wrapper.find(".time-range input"), this.options);
+            this.query();
+            $btnNext.hide();
+        } else if (data.step === 3 && data.direction === 'previous'){
+            $btnNext.show();
+            $btnNext.text(' Построить график').prepend('<i class="fa fa-check-circle"></i>')
+                .removeClass('btn-primary').addClass('btn-success');
+        } else {
+            $btnNext.show();
+            $btnNext.text('Далее ').
+            append('<i class="fa fa-arrow-right"></i>')
+                .removeClass('btn-success').addClass('btn-primary');
+        }
+    },
+
+    wizardNext: function (event) {
+        this.$(event.target).parents(".wizard-wrapper").find(".wizard").wizard('next');
+    },
+
+    wizardPrev: function () {
+        this.$(event.target).parents(".wizard-wrapper").find(".wizard").wizard('previous');
     }
 
 });

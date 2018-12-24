@@ -176,9 +176,6 @@ var admixerListTmpl = "<div class=\"control-inline toolbar-item-group sd-chart-l
 "</div>";
 
 
-
-
-
 var marketsTmpl = _.template(
     '<% for(var i in collection) { %>\n' +
     '<optgroup label="<%= collection[i].market %>">\n' +
@@ -192,11 +189,6 @@ var simpleMarketsTmpl = _.template(
     '<% for(var i in collection) { %>\n' +
     '<option value="<%= collection[i].market %>"><%= collection[i].market %></option>\n' +
     '<% } %>');
-
-var formatSelectBox = function(state) {
-    return '<div class="label label-success">' + $(state.element).parent().attr("label") + '</div>'+
-        '<div class="label label-primary">' + state.text + '</div>';
-};
 
 var Themes = Backbone.Collection.extend({
     url: 'charts/themes'
