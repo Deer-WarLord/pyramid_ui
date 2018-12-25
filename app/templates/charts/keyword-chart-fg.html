@@ -1,0 +1,69 @@
+<div class="widget">
+    <div class="widget-header">
+        <h3><i class="fa fa-magic"></i> Построение запроса</h3></div>
+    <div class="widget-content">
+        <div class="wizard-wrapper">
+            <div class="wizard">
+                <ul class="steps">
+                    <li data-target="#step1" class="active"><span class="badge badge-info">1</span>Рынки<span class="chevron"></span></li>
+                    <li data-target="#step2"><span class="badge">2</span>Темы / Компании<span class="chevron"></span></li>
+                    <li data-target="#step3"><span class="badge">3</span>График<span class="chevron"></span></li>
+                </ul>
+            </div>
+            <div class="step-content">
+                <div class="step-pane active" id="step1">
+                    <form class="form1" data-parsley-validate novalidate>
+                        <p>Выберите интересующие вас рынки:</p>
+                        <select name="multiselect1[]" class="multiselect markets-selection" multiple="multiple"></select>
+                    </form>
+                </div>
+                <div class="step-pane" id="step2">
+                    <form class="form2" data-parsley-validate novalidate>
+                        <p>Выберите интересующие вас темы или компании:</p>
+                        <select multiple name="select2-multiple1" class="select2 select2-multiple themes-selection"></select>
+                    </form>
+                </div>
+                <div class="step-pane" id="step3">
+                    <div class="widget widget-table">
+                        <div class="widget-header">
+                            <h3><i class="fa fa-table"></i> Информация по темам и компаниям в динамике <span class="sd-chart-title"></span></h3>
+                            <div class="btn-group widget-header-toolbar">
+                                <div class="control-inline toolbar-item-group">
+                                    <div class="time-range pull-right report-range">
+                                        <i class="fa fa-calendar"></i>
+                                        <span class="range-value"></span><b class="caret"></b>
+                                        <input type="hidden"/>
+                                    </div>
+                                </div>
+                                <a href="#" title="Expand/Collapse" class="btn-borderless btn-toggle-expand"><i class="fa fa-chevron-up"></i></a>
+                            </div>
+                        </div>
+                        <div class="widget-content">
+                            <canvas class="demo-vertical-bar-chart" height="350"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="widget widget-table">
+                        <div class="widget-header">
+                            <h3><i class="fa fa-table"></i> Информация по темам и компаниям общая</h3>
+                            <div class="btn-group widget-header-toolbar">
+                                <a href="#" title="Expand/Collapse" class="btn-borderless btn-toggle-expand"><i class="fa fa-chevron-up"></i></a>
+                            </div>
+                        </div>
+                        <div class="widget-content">
+                            <canvas class="demo-donut-chart" height="350"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="actions">
+                <button type="button" class="btn btn-default btn-prev"><i class="fa fa-arrow-left"></i> Назад</button>
+                <button type="button" class="btn btn-primary btn-next">Далее <i class="fa fa-arrow-right"></i></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+

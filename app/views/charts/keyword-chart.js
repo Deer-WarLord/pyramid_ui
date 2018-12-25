@@ -44,7 +44,7 @@ module.exports = Marionette.CompositeView.extend({
 
     ui: {
         "dynamicChart": ".demo-vertical-bar-chart",
-        "donutChart": "#demo-donut-chart",
+        "donutChart": ".demo-donut-chart",
         "reportRange": ".time-range",
         "input": ".time-range input",
         "selectMarket": ".markets-selection",
@@ -195,11 +195,6 @@ module.exports = Marionette.CompositeView.extend({
         return results;
     },
 
-    // get day function
-    gt: function(y, m, d) {
-        return new Date(y, m-1, d);
-    },
-
     buildDynamicGraph: function (data) {
         var self = this;
         if (self.barChart === undefined) {
@@ -258,13 +253,12 @@ module.exports = Marionette.CompositeView.extend({
             self.barChart.options.scales.xAxes[0].time.max = data[1];
             self.barChart.update();
         }
-
     },
 
     buildCircleGraph: function (data) {
         var self = this;
         if (self.donutChart === undefined) {
-            self.donutChart = new Chart(this.$(".demo-donut-chart"), {
+            self.donutChart = new Chart(self.ui.donutChart, {
                 type: 'doughnut',
                 data: {
                     labels: _.map(data, function(item) { return item.label; }),
@@ -284,7 +278,6 @@ module.exports = Marionette.CompositeView.extend({
             }];
             self.donutChart.update();
         }
-
     },
 
     onShow: function() {
