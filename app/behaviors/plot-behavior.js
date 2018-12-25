@@ -90,6 +90,8 @@ module.exports = Marionette.Behavior.extend({
 
         var $td = sdTable.parent();
         var title = $($td.parents("div").get(1)).find('tr.row-headers > th').eq($td.index()).text();
+        title += " " + $td.parent().children().eq(0).text();
+        title += " c " + this.view.model.get("posted_date__gte") + " по " + this.view.model.get("posted_date__lte");
 
         var donutData = _.map(data, function(item){
             return {
