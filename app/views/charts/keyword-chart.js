@@ -114,24 +114,57 @@ module.exports = Marionette.CompositeView.extend({
         });
     },
 
+    stringToColour: function(str) {
+        var hash = 0;
+        for (var i = 0; i < str.length; i++) {
+            hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        var colour = '#';
+        for (var i = 0; i < 3; i++) {
+            var value = (hash >> (i * 8)) & 0xFF;
+            colour += ('00' + value.toString(16)).substr(-2);
+        }
+        return colour;
+    },
+
     processGraphData: function (data) {
         var self = this;
-        return _.chain(data)
+        var maxDate = new Date(_.max(data, function(item) {return new Date(item.date)}).date);
+        maxDate.setDate(maxDate.getDate() + 6);
+        var dateDict = _.chain(data)
+                        .map(function(item){ return item.date; })
+                        .uniq()
+                        .sortBy(function(item) {return new Date(item)})
+                        .map(function (item) { return {x: item, y: 0};})
+                        .value();
+        return [_.chain(data)
                 .groupBy(function(item) { return item.key_word; })
                 .mapObject(function(val, key) {
-                    return _.map(val,function(item){
-                        return [self.gt.apply(self, item.date.split("-")), item.publication_amount]
-                    });
+                    return _.chain(val)
+                            .map(function(item){
+                                return { x: item.date, y: item.publication_amount};
+                            })
+                            .sortBy(function(item) { return new Date(item.x); })
+                            .union(dateDict)
+                            .uniq("x")
+                            .sortBy(function(item) { return new Date(item.x); })
+                            .value();
                 })
                 .pairs()
                 .map(function (item) {
-                    return {label: item[0], data: item[1]};
+                    return {
+                        label: item[0],
+                        data: item[1],
+                        backgroundColor: self.stringToColour(item[0]),
+                        borderColor : "#111",
+                        borderWidth : 1
+                    };
                 })
-                .value();
+                .value(), maxDate];
     },
 
     processCircleGraphData: function (data) {
-
+        var self = this;
         var results =  _.chain(data)
                         .groupBy(function(item) { return item.key_word; })
                         .mapObject(function(val, key) {
@@ -141,7 +174,13 @@ module.exports = Marionette.CompositeView.extend({
                         })
                         .pairs()
                         .map(function (item) {
-                            return {label: item[0], data: item[1]};
+                            return {
+                                label: item[0],
+                                data: item[1],
+                                backgroundColor: self.stringToColour(item[0]),
+                                borderColor : "#111",
+                                borderWidth : 1
+                            };
                         })
                         .value();
 
@@ -158,83 +197,94 @@ module.exports = Marionette.CompositeView.extend({
 
     // get day function
     gt: function(y, m, d) {
-        return new Date(y, m-1, d).getTime();
+        return new Date(y, m-1, d);
     },
 
     buildDynamicGraph: function (data) {
-        var config = {
-            bars: {
-                show: true,
-                barWidth: 4,
-                fill: true,
-                order: true,
-                lineWidth: 4,
-                fillColor: { colors: [ { opacity: 1 }, { opacity: 1 } ] }
-            },
-            grid: {
-                hoverable: true,
-                clickable: true,
-                borderWidth: 0,
-                tickColor: "#E4E4E4"
-            },
-            yaxis: {
-                font: { color: "#555" }
-            },
-            xaxis: {
-                mode: "time",
-                timezone: "browser",
-                timeformat: "%d/%m/%y",
-                font: { color: "#555" },
-                tickColor: "#fafafa"
-            },
-            legend: {
-                labelBoxBorderColor: "transparent",
-                backgroundColor: "transparent"
-            },
-            tooltip: true,
-            tooltipOpts: {
-                content: '%s: %y'
-            }
-        };
-        console.log(data);
-        try {
-            $.plot(this.ui.dynamicChart, data, config);
-        } catch (err) {
-            alert("По этому запросу данных не найдено");
+        var self = this;
+        if (self.barChart === undefined) {
+            self.barChart = new Chart(this.ui.dynamicChart, {
+                type: 'bar',
+                data: {
+                    datasets: data[0]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        xAxes: [{
+                            type: 'time',
+                            time: {
+                                unit: 'week',
+                                displayFormats: {
+                                    quarter: 'll'
+                                },
+                                max: data[1]
+                            }
+                        }]
+                    },
+                    'onClick' : function (evt, item) {
+                        var el = this.getElementAtEvent(evt);
+                        if (el.length > 0) {
+                            var key_word = this.data.datasets[el[0]._datasetIndex].label;
+                            var date = this.data.datasets[el[0]._datasetIndex].data[el[0]._index].x;
+                            $.ajax({
+                                beforeSend: function(xhr) {
+                                    xhr.setRequestHeader("X-CSRFToken", Cookies.get('csrftoken'));
+                                },
+                                url: '/noksfishes/publications-title-date/?key_word='+key_word+'&posted_date='+date,
+                                type: 'GET',
+                                success: function(data, status, callback) {
+                                    var table = self.$("#publications-list").DataTable({
+                                        bDestroy: true,
+                                        sDom: "t",
+                                        data: data,
+                                        scrollY: "300px",
+                                        scrollCollapse: true,
+                                        paging: false,
+                                        columns: [
+                                            { data: 'title' },
+                                            { data: 'posted_date' },
+                                            { data: 'count' }
+                                        ]
+                                    });
+                                }
+                            });
+                        }
+                    }
+                }
+            });
+        } else {
+            self.barChart.data.datasets = data[0];
+            self.barChart.options.scales.xAxes[0].time.max = data[1];
+            self.barChart.update();
         }
+
     },
 
     buildCircleGraph: function (data) {
-
-        var donutLabelFormatter = function (label, series) {
-            return "<div class=\"donut-label\">" + label + "<br/>" + Math.round(series.percent) + "%</div>";
-        };
-
-        var config = {
-            series: {
-                pie: {
-                    show: true,
-                    innerRadius: .4,
-                    stroke: {
-                        width: 4,
-                        color: "#ffffff"
-                    },
-                    label: {
-                        show: true,
-                        radius: 3/4,
-                        formatter: donutLabelFormatter
-                    }
+        var self = this;
+        if (self.donutChart === undefined) {
+            self.donutChart = new Chart(this.$(".demo-donut-chart"), {
+                type: 'doughnut',
+                data: {
+                    labels: _.map(data, function(item) { return item.label; }),
+                    datasets: [{
+                        data: _.map(data, function(item) { return item.data; }),
+                        backgroundColor: _.map(data, function(item) { return item.backgroundColor; })
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false
                 }
-            },
-            legend: {
-                show: false
-            },
-            grid: {
-                hoverable: true
-            }
-        };
+            });
+        } else {
+            self.donutChart.data.datasets = [{
+                data: _.map(data, function(item) { return item.data; }),
+                backgroundColor: _.map(data, function(item) { return item.backgroundColor; })
+            }];
+            self.donutChart.update();
+        }
 
-        $.plot('#demo-donut-chart', data, config);
     },
 
     onShow: function() {
