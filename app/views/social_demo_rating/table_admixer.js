@@ -4,8 +4,8 @@ var SocialDemoRatingCollection = require('../../collections/social_demo_rating_a
 
 var GenderGroupsMap = {
     0: "Неизвестно",
-    1: "Мужчин",
-    2: "Женщин"
+    1: "Мужчины",
+    2: "Женщины"
 };
 
 var AgeGroupsMap = {
