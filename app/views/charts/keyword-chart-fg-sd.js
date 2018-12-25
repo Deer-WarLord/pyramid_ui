@@ -315,21 +315,56 @@ module.exports = Marionette.CompositeView.extend({
         });
     },
 
+    stringToColour: function(str) {
+        var hash = 0;
+        for (var i = 0; i < str.length; i++) {
+            hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        var colour = '#';
+        for (var i = 0; i < 3; i++) {
+            var value = (hash >> (i * 8)) & 0xFF;
+            colour += ('00' + value.toString(16)).substr(-2);
+        }
+        return colour;
+    },
+
     processGraphData: function (data, sdMap, url) {
         var self = this;
         var sdKey = this.model.get("sd");
+        var maxDate = new Date(_.max(data, function(item) {return new Date(item.date)}).date);
+        var minDate = new Date(_.min(data, function(item) {return new Date(item.date)}).date);
+        maxDate.setDate(maxDate.getDate() + 6);
+        minDate.setDate(minDate.getDate() - 6);
+        var dateDict = _.chain(data)
+            .map(function(item){ return item.date; })
+            .uniq()
+            .sortBy(function(item) {return new Date(item)})
+            .map(function (item) { return {x: item, y: 0};})
+            .value();
 
         if (sdKey === undefined){
             var result = _.chain(data)
                 .groupBy(function(item) { return item.key_word; })
                 .mapObject(function(val, key) {
-                    return _.map(val,function(item){
-                        return [self.gt.apply(self, item.date.split("-")), item.views]
-                    });
+                    return _.chain(val)
+                        .map(function(item){
+                            return { x: item.date, y: item.views};
+                        })
+                        .sortBy(function(item) { return new Date(item.x); })
+                        .union(dateDict)
+                        .uniq("x")
+                        .sortBy(function(item) { return new Date(item.x); })
+                        .value();
                 })
                 .pairs()
                 .map(function (item) {
-                    return {label: item[0], data: item[1]};
+                    return {
+                        label: item[0],
+                        data: item[1],
+                        backgroundColor: self.stringToColour(item[0]),
+                        borderColor : "#111",
+                        borderWidth : 1
+                    };
                 })
                 .value();
         } else {
@@ -344,14 +379,14 @@ module.exports = Marionette.CompositeView.extend({
                     _.each(sdMap[sdKey], function (el_j_v, el_j_k) {
                         var views = el_i[sdKey][el_j_k];
                         views = (views !== undefined) ? views/100.0 * el_i.views : 0;
-                        result[el_j_v].push([self.gt.apply(self, el_i.date.split("-")), views]);
+                        result[el_j_v].push([el_i.date, views]);
                     })
                 });
             } else {
                 _.each(data, function (el_i) {
                     _.each(sdMap[sdKey], function (el_j_v, el_j_k) {
                         var views = el_i[sdKey][el_j_k];
-                        result[el_j_v].push([self.gt.apply(self, el_i.date.split("-")), views]);
+                        result[el_j_v].push([el_i.date, views]);
                     })
                 });
             }
@@ -364,59 +399,74 @@ module.exports = Marionette.CompositeView.extend({
                                     return s + item[1]}, 0);
                             })
                             .pairs().value();
-            }).pairs().map(function (item) { return {label: item[0], data: item[1]};}).value();
+            }).pairs().map(function (item) {
+                return {
+                    label: item[0],
+                    data: _.chain(item[1])
+                            .sortBy(function (el) {
+                                return el[0];})
+                            .map(function(el){
+                                return {x:el[0], y:el[1]};})
+                            .value(),
+                    backgroundColor: self.stringToColour(item[0]),
+                    borderColor : "#111",
+                    borderWidth : 1
+                };
+            }).value();
 
         }
 
-        return result;
-    },
-
-    // get day function
-    gt: function(y, m, d) {
-        return new Date(y, m-1, d).getTime();
+        return [result, minDate, maxDate];
     },
 
     buildDynamicGraph: function (data) {
-        var config = {
-            bars: {
-                show: true,
-                barWidth: 4,
-                fill: true,
-                order: true,
-                lineWidth: 4,
-                fillColor: { colors: [ { opacity: 1 }, { opacity: 1 } ] }
-            },
-            grid: {
-                hoverable: true,
-                clickable: true,
-                borderWidth: 0,
-                tickColor: "#E4E4E4"
-            },
-            yaxis: {
-                font: { color: "#555" }
-            },
-            xaxis: {
-                mode: "time",
-                timezone: "browser",
-                timeformat: "%d/%m/%y",
-                font: { color: "#555" },
-                tickColor: "#fafafa"
-            },
-            legend: {
-                labelBoxBorderColor: "transparent",
-                backgroundColor: "transparent"
-            },
-            tooltip: true,
-            tooltipOpts: {
-                content: '%s: %y'
-            }
-        };
-        try {
-            $.plot(this.ui.dynamicChart, data, config);
-        } catch (err) {
-            alert("По этому запросу данных не найдено");
-        }
+        var self = this;
+        if (self.barChart === undefined) {
+            self.barChart = new Chart(this.ui.dynamicChart, {
+                type: 'bar',
+                data: {
+                    datasets: data[0]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        xAxes: [{
+                            type: 'time',
+                            time: {
+                                unit: 'week',
+                                displayFormats: {
+                                    quarter: 'll'
+                                },
+                                min: data[1],
+                                max: data[2]
+                            }
+                        }]
+                    },
+                    'onClick' : function (evt, item) {
+                        var el = this.getElementAtEvent(evt);
+                        if (el.length > 0) {
+                            var provider = (self.model.get("url").includes("-fg-")) ?
+                                'specific-social-demo-rating-fg/' : 'specific-social-demo-rating-admixer/';
+                            var fromDate = data[1];
+                            fromDate.setDate(fromDate.getDate() + 6);
+                            var toDate = data[2];
+                            toDate.setDate(toDate.getDate() - 6);
 
+                            var history = provider +
+                                moment(fromDate).format('YYYY-MM-DD') + "/" +
+                                moment(toDate).format('YYYY-MM-DD') + "/" +
+                                self.model.get("key_word__in");
+                            Backbone.history.navigate(history);
+                        }
+                    }
+                }
+            });
+        } else {
+            self.barChart.data.datasets = data[0];
+            self.barChart.options.scales.xAxes[0].time.min = data[1];
+            self.barChart.options.scales.xAxes[0].time.max = data[2];
+            self.barChart.update();
+        }
     },
 
 
@@ -431,7 +481,6 @@ module.exports = Marionette.CompositeView.extend({
             },
             data: this.model.attributes
         });
-        self.query();
     },
 
     addChart: function (event) {
