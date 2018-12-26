@@ -131,6 +131,8 @@ module.exports = Marionette.CompositeView.extend({
         var self = this;
         var maxDate = new Date(_.max(data, function(item) {return new Date(item.date)}).date);
         maxDate.setDate(maxDate.getDate() + 6);
+        var minDate = new Date(_.min(data, function(item) {return new Date(item.date)}).date);
+        minDate.setDate(minDate.getDate() - 6);
         var dateDict = _.chain(data)
                         .map(function(item){ return item.date; })
                         .uniq()
@@ -160,7 +162,7 @@ module.exports = Marionette.CompositeView.extend({
                         borderWidth : 1
                     };
                 })
-                .value(), maxDate];
+                .value(), minDate, maxDate];
     },
 
     processCircleGraphData: function (data) {
@@ -213,7 +215,8 @@ module.exports = Marionette.CompositeView.extend({
                                 displayFormats: {
                                     quarter: 'll'
                                 },
-                                max: data[1]
+                                min: data[1],
+                                max: data[2]
                             }
                         }]
                     },
@@ -221,12 +224,17 @@ module.exports = Marionette.CompositeView.extend({
                         var el = this.getElementAtEvent(evt);
                         if (el.length > 0) {
                             var key_word = this.data.datasets[el[0]._datasetIndex].label;
-                            var date = this.data.datasets[el[0]._datasetIndex].data[el[0]._index].x;
+                            var toDate = this.data.datasets[el[0]._datasetIndex].data[el[0]._index].x;
+                            var fromDate = moment(new Date(toDate)).format('YYYY-MM-DD');
+                            var url = '/noksfishes/publications-title-date/?key_word=' +
+                                        key_word +
+                                        '&posted_date__lte=' + toDate +
+                                        '&posted_date__gte=' + fromDate;
                             $.ajax({
                                 beforeSend: function(xhr) {
                                     xhr.setRequestHeader("X-CSRFToken", Cookies.get('csrftoken'));
                                 },
-                                url: '/noksfishes/publications-title-date/?key_word='+key_word+'&posted_date='+date,
+                                url: url,
                                 type: 'GET',
                                 success: function(data, status, callback) {
                                     var table = self.$("#publications-list").DataTable({
