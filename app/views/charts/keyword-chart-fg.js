@@ -224,7 +224,8 @@ module.exports = Marionette.CompositeView.extend({
             });
         } else {
             self.barChart.data.datasets = data[0];
-            self.barChart.options.scales.xAxes[0].time.max = data[1];
+            self.barChart.options.scales.xAxes[0].time.min = data[1];
+            self.barChart.options.scales.xAxes[0].time.max = data[2];
             self.barChart.update();
         }
     },
