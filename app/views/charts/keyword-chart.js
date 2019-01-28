@@ -11,6 +11,15 @@ var marketsTmpl = _.template(
     '</optgroup>\n' +
     '<% } %>');
 
+var objectsTmpl = _.template(
+    '<% for(var i in collection) { %>\n' +
+    '<optgroup label="<%= collection[i].key_word %>">\n' +
+    '    <% for(var j in collection[i].objects) { %>\n' +
+    '    <option value="<%= collection[i].objects[j] %>"><%= collection[i].objects[j] %></option>\n' +
+    '    <% } %>\n' +
+    '</optgroup>\n' +
+    '<% } %>');
+
 var Themes = Backbone.Collection.extend({
     url: 'charts/themes'
 });
@@ -49,6 +58,7 @@ module.exports = Marionette.CompositeView.extend({
         "input": ".time-range input",
         "selectMarket": ".markets-selection",
         "selectThemeCompany": "select.themes-selection",
+        "selectObject": "select.objects-selection",
         "wizard": ".wizard",
         "wizardNext": ".wizard-wrapper .btn-next",
         "wizardPrev": ".wizard-wrapper .btn-prev"
@@ -65,6 +75,9 @@ module.exports = Marionette.CompositeView.extend({
                 }
             },
             '@ui.selectThemeCompany': {
+                "select2": {}
+            },
+            '@ui.selectObject': {
                 "select2": {}
             }
         },
@@ -88,13 +101,13 @@ module.exports = Marionette.CompositeView.extend({
                 "posted_date__gte": data.fromDate,
                 "posted_date__lte": data.toDate
             });
-            this.query();
+            this.query((self.model.has("object__in")) ? "object" : "key_word");
         } else {
             console.log("Some value is empty!");
         }
     },
 
-    query: function() {
+    query: function(groupBy) {
         var self = this;
         $.ajax({
             beforeSend: function(xhr, settings) {
@@ -102,12 +115,29 @@ module.exports = Marionette.CompositeView.extend({
             },
             dataType: "json",
             contentType: "application/json",
-            url: "/charts/keyword/",
+            url: (groupBy === "key_word") ? "/charts/keyword/" : "/charts/object/",
             data: this.model.toJSON(),
-            success: function( respond, textStatus, jqXHR ){
-                self.buildDynamicGraph(self.processGraphData(respond));
-                self.buildCircleGraph(self.processCircleGraphData(respond));
+            success: function(respond, textStatus, jqXHR ){
+                self.buildDynamicGraph(self.processGraphData(respond, groupBy), groupBy);
+                self.buildCircleGraph(self.processCircleGraphData(respond, groupBy), groupBy);
             },
+            error: function( jqXHR, textStatus, errorThrown ){
+                console.log(jqXHR);
+            }
+        });
+    },
+
+    queryObjectsList: function(successCb) {
+        var self = this;
+        $.ajax({
+            beforeSend: function(xhr, settings) {
+                xhr.setRequestHeader("X-CSRFToken", Cookies.get('csrftoken'));
+            },
+            dataType: "json",
+            contentType: "application/json",
+            url: "/charts/objects/",
+            data: this.model.toJSON(),
+            success: successCb,
             error: function( jqXHR, textStatus, errorThrown ){
                 console.log(jqXHR);
             }
@@ -127,7 +157,7 @@ module.exports = Marionette.CompositeView.extend({
         return colour;
     },
 
-    processGraphData: function (data) {
+    processGraphData: function (data, groupBy) {
         var self = this;
         var maxDate = new Date(_.max(data, function(item) {return new Date(item.date)}).date);
         maxDate.setDate(maxDate.getDate() + 6);
@@ -140,7 +170,7 @@ module.exports = Marionette.CompositeView.extend({
                         .map(function (item) { return {x: item, y: 0};})
                         .value();
         return [_.chain(data)
-                .groupBy(function(item) { return item.key_word; })
+                .groupBy(function(item) { return item[groupBy]; })
                 .mapObject(function(val, key) {
                     return _.chain(val)
                             .map(function(item){
@@ -165,10 +195,10 @@ module.exports = Marionette.CompositeView.extend({
                 .value(), minDate, maxDate];
     },
 
-    processCircleGraphData: function (data) {
+    processCircleGraphData: function (data, groupBy) {
         var self = this;
         var results =  _.chain(data)
-                        .groupBy(function(item) { return item.key_word; })
+                        .groupBy(function(item) { return item[groupBy]; })
                         .mapObject(function(val, key) {
                             return _.reduce(val, function(memo, item){
                                 return memo + item.publication_amount;
@@ -197,7 +227,7 @@ module.exports = Marionette.CompositeView.extend({
         return results;
     },
 
-    buildDynamicGraph: function (data) {
+    buildDynamicGraph: function (data, groupBy) {
         var self = this;
         if (self.barChart === undefined) {
             self.barChart = new Chart(this.ui.dynamicChart, {
@@ -223,13 +253,13 @@ module.exports = Marionette.CompositeView.extend({
                     'onClick' : function (evt, item) {
                         var el = this.getElementAtEvent(evt);
                         if (el.length > 0) {
-                            var key_word = this.data.datasets[el[0]._datasetIndex].label;
+                            var groupByItem = this.data.datasets[el[0]._datasetIndex].label;
                             var toDate = this.data.datasets[el[0]._datasetIndex].data[el[0]._index].x;
                             var fromDate = new Date(toDate);
                             fromDate.setDate(fromDate.getDate() - 6);
                             fromDate = moment(fromDate).format('YYYY-MM-DD');
-                            var url = '/noksfishes/publications-title-date/?key_word=' +
-                                        key_word +
+                            var url = '/noksfishes/publications-title-date/?' + groupBy + '=' +
+                                        groupByItem +
                                         '&posted_date__lte=' + toDate +
                                         '&posted_date__gte=' + fromDate;
                             $.ajax({
@@ -266,7 +296,7 @@ module.exports = Marionette.CompositeView.extend({
         }
     },
 
-    buildCircleGraph: function (data) {
+    buildCircleGraph: function (data, groupBy) {
         var self = this;
         if (self.donutChart === undefined) {
             self.donutChart = new Chart(self.ui.donutChart, {
@@ -283,6 +313,7 @@ module.exports = Marionette.CompositeView.extend({
                 }
             });
         } else {
+            self.donutChart.data.labels = _.map(data, function(item) { return item.label; });
             self.donutChart.data.datasets = [{
                 data: _.map(data, function(item) { return item.data; }),
                 backgroundColor: _.map(data, function(item) { return item.backgroundColor; })
@@ -306,10 +337,21 @@ module.exports = Marionette.CompositeView.extend({
 
     wizardChange: function (e, data) {
 
+        var self = this;
         var $wrapper = $(e.target).parents(".wizard-wrapper");
-        var $btnNext = $wrapper.find('.btn-next');
+        var $btnNext = $wrapper.find('.btn-primary.btn-next');
+        var $btnSuccess = $wrapper.find('.btn-success.btn-next');
 
-        if((data.step === 1 && data.direction === 'next')) {
+        if (self.withoutObject === true) {
+            this.ui.dynamicChart = $wrapper.find(".demo-vertical-bar-chart");
+            $wrapper.find(".sd-chart-title").html(JSON.parse(this.model.get("key_word__in")).join());
+            this.triggerMethod('fetched');
+            this.triggerMethod("updateDateControls", $wrapper.find(".time-range"), $wrapper.find(".time-range input"), this.options);
+            this.query("key_word");
+            $btnSuccess.removeClass("hidden");
+            $btnNext.hide();
+            $btnSuccess.addClass("hidden");
+        } else if((data.step === 1 && data.direction === 'next')) {
 
             var markets = _.map($wrapper.find('.form1').serializeArray(), function (item) { return item.value; });
 
@@ -320,10 +362,10 @@ module.exports = Marionette.CompositeView.extend({
             } else {
                 return false;
             }
-
+            self.withoutObject = false;
             $btnNext.show();
-            $btnNext.text(' Построить график').prepend('<i class="fa fa-check-circle"></i>')
-                .removeClass('btn-primary').addClass('btn-success');
+            $btnSuccess.removeClass("hidden");
+
         } else if(data.step === 2 && data.direction === 'next') {
             themes = _.map($wrapper.find('.form2').serializeArray(), function (item) {
                 return item.value;
@@ -335,25 +377,52 @@ module.exports = Marionette.CompositeView.extend({
                 return false;
             }
 
+            if (this.isSuccessButton === true) {
+                setTimeout(function() {
+                    self.withoutObject = true;
+                    self.ui.wizardNext.click();
+                }, 10);
+            } else {
+                this.queryObjectsList(function(objects){
+                    $wrapper.find(".objects-selection").html(objectsTmpl({collection: objects}));
+                    self.triggerMethod('fetched');
+                });
+                $btnNext.hide();
+                self.withoutObject = false;
+            }
+
+        } else if(data.step === 3 && data.direction === 'next') {
+
+            var objects = _.map($wrapper.find('.form3').serializeArray(), function (item) {
+                return item.value;
+            });
+
+            if (objects.length > 0) {
+                this.model.set("object__in", JSON.stringify(objects));
+            } else {
+                return false;
+            }
+
             this.ui.dynamicChart = $wrapper.find(".demo-vertical-bar-chart");
-            $wrapper.find(".sd-chart-title").html(JSON.parse(this.model.get("key_word__in")).join());
+            $wrapper.find(".sd-chart-title").html(JSON.parse(this.model.get("object__in")).join());
             this.triggerMethod('fetched');
             this.triggerMethod("updateDateControls", $wrapper.find(".time-range"), $wrapper.find(".time-range input"), this.options);
-            this.query();
+            this.query("object");
             $btnNext.hide();
-        } else if (data.step === 3 && data.direction === 'previous'){
-            $btnNext.show();
-            $btnNext.text(' Построить график').prepend('<i class="fa fa-check-circle"></i>')
-                .removeClass('btn-primary').addClass('btn-success');
+            $btnSuccess.addClass("hidden");
+            self.withoutObject = false;
+
+        } else if (data.step === 4 && data.direction === 'previous'){
+            $btnNext.hide();
+            $btnSuccess.removeClass("hidden");
         } else {
             $btnNext.show();
-            $btnNext.text('Далее ').
-            append('<i class="fa fa-arrow-right"></i>')
-                .removeClass('btn-success').addClass('btn-primary');
+            $btnSuccess.addClass("hidden");
         }
     },
 
     wizardNext: function (event) {
+        this.isSuccessButton = this.$(event.target).hasClass('btn-success');
         this.$(event.target).parents(".wizard-wrapper").find(".wizard").wizard('next');
     },
 

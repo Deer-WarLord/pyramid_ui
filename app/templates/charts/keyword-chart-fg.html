@@ -7,7 +7,8 @@
                 <ul class="steps">
                     <li data-target="#step1" class="active"><span class="badge badge-info">1</span>Рынки<span class="chevron"></span></li>
                     <li data-target="#step2"><span class="badge">2</span>Темы / Компании<span class="chevron"></span></li>
-                    <li data-target="#step3"><span class="badge">3</span>График<span class="chevron"></span></li>
+                    <li data-target="#step3"><span class="badge">3</span>Объекты<span class="chevron"></span></li>
+                    <li data-target="#step4"><span class="badge">4</span>График<span class="chevron"></span></li>
                 </ul>
             </div>
             <div class="step-content">
@@ -24,6 +25,12 @@
                     </form>
                 </div>
                 <div class="step-pane" id="step3">
+                    <form class="form3" data-parsley-validate novalidate>
+                        <p>Выберите интересующие вас объект:</p>
+                        <select multiple name="select2-multiple1" class="select2 select2-multiple objects-selection"></select>
+                    </form>
+                </div>
+                <div class="step-pane" id="step4">
                     <div class="widget widget-table">
                         <div class="widget-header">
                             <h3><i class="fa fa-table"></i> Информация по темам и компаниям в динамике <span class="sd-chart-title"></span></h3>
@@ -58,6 +65,7 @@
             </div>
             <div class="actions">
                 <button type="button" class="btn btn-default btn-prev"><i class="fa fa-arrow-left"></i> Назад</button>
+                <button type="button" class="btn btn-success btn-next hidden"><i class="fa fa-check-circle"></i> Построить график</button>
                 <button type="button" class="btn btn-primary btn-next">Далее <i class="fa fa-arrow-right"></i></button>
             </div>
         </div>
