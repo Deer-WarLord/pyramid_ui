@@ -190,6 +190,20 @@ var simpleMarketsTmpl = _.template(
     '<option value="<%= collection[i].market %>"><%= collection[i].market %></option>\n' +
     '<% } %>');
 
+var objectsTmpl = _.template(
+    '<% for(var i in collection) { %>\n' +
+    '<optgroup label="<%= collection[i].key_word %>">\n' +
+    '    <% for(var j in collection[i].objects) { %>\n' +
+    '    <option value="<%= collection[i].objects[j] %>"><%= collection[i].objects[j] %></option>\n' +
+    '    <% } %>\n' +
+    '</optgroup>\n' +
+    '<% } %>');
+
+var simpleObjectsTmpl = _.template(
+    '<% for(var i in collection) { %>\n' +
+    '<option value="<%= collection[i].object %>"><%= collection[i].object %></option>\n' +
+    '<% } %>');
+
 var Themes = Backbone.Collection.extend({
     url: 'charts/themes'
 });
@@ -229,6 +243,7 @@ module.exports = Marionette.CompositeView.extend({
         "addChart": "#add-chart",
         "selectMarket": ".markets-selection",
         "selectThemeCompany": "select.themes-selection",
+        "selectObject": "select.objects-selection",
         "wizard": ".wizard",
         "wizardNext": ".wizard-wrapper .btn-next",
         "wizardPrev": ".wizard-wrapper .btn-prev"
@@ -245,6 +260,9 @@ module.exports = Marionette.CompositeView.extend({
                 }
             },
             '@ui.selectThemeCompany': {
+                "select2": {}
+            },
+            '@ui.selectObject': {
                 "select2": {}
             },
             '@ui.sdList': {
@@ -275,7 +293,7 @@ module.exports = Marionette.CompositeView.extend({
     filterCollectionSd: function(event, val, isTrue) {
         this.model.set("sd", val);
         this.ui.dynamicChart = this.$(event.target).parents(".widget").find(".demo-vertical-bar-chart");
-        this.query();
+        this.query((self.model.has("object__in")) ? "object" : "key_word");
     },
 
     filterCollectionDates: function(event, data) {
@@ -288,14 +306,15 @@ module.exports = Marionette.CompositeView.extend({
                 "posted_date__lte": data.toDate
             });
             this.ui.dynamicChart = this.$(event.target).parents(".widget").find(".demo-vertical-bar-chart");
-            this.query();
+            this.query((self.model.has("object__in")) ? "object" : "key_word");
         } else {
             console.log("Some value is empty!");
         }
     },
 
-    query: function() {
+    query: function(groupBy) {
         var self = this;
+        //(groupBy === "key_word") ? "/charts/keyword/" : "/charts/object/",
         var url = this.model.get("url") || "/charts/keyword-fg-sd/";
         var sdMap = (url.includes("-fg-")) ? FACTRUM_SD_MAP : ADMIXER_SD_MAP;
         $.ajax({
@@ -307,8 +326,25 @@ module.exports = Marionette.CompositeView.extend({
             url: url,
             data: _.omit(this.model.toJSON(), "url"),
             success: function( respond, textStatus, jqXHR ){
-                self.buildDynamicGraph(self.processGraphData(respond, sdMap, url));
+                self.buildDynamicGraph(self.processGraphData(respond, sdMap, url, groupBy));
             },
+            error: function( jqXHR, textStatus, errorThrown ){
+                console.log(jqXHR);
+            }
+        });
+    },
+
+    queryObjectsList: function(successCb) {
+        var self = this;
+        $.ajax({
+            beforeSend: function(xhr, settings) {
+                xhr.setRequestHeader("X-CSRFToken", Cookies.get('csrftoken'));
+            },
+            dataType: "json",
+            contentType: "application/json",
+            url: "/charts/objects/",
+            data: this.model.toJSON(),
+            success: successCb,
             error: function( jqXHR, textStatus, errorThrown ){
                 console.log(jqXHR);
             }
@@ -328,7 +364,7 @@ module.exports = Marionette.CompositeView.extend({
         return colour;
     },
 
-    processGraphData: function (data, sdMap, url) {
+    processGraphData: function (data, sdMap, url, groupBy) {
         var self = this;
         var sdKey = this.model.get("sd");
         var maxDate = new Date(_.max(data, function(item) {return new Date(item.date)}).date);
@@ -344,7 +380,7 @@ module.exports = Marionette.CompositeView.extend({
 
         if (sdKey === undefined){
             var result = _.chain(data)
-                .groupBy(function(item) { return item.key_word; })
+                .groupBy(function(item) { return item[groupBy]; })
                 .mapObject(function(val, key) {
                     return _.chain(val)
                         .map(function(item){
@@ -492,8 +528,10 @@ module.exports = Marionette.CompositeView.extend({
 
     wizardChange: function (e, data) {
 
+        var self = this;
         var $wrapper = $(e.target).parents(".wizard-wrapper");
-        var $btnNext = $wrapper.find('.btn-next');
+        var $btnNext = $wrapper.find('.btn-primary.btn-next');
+        var $btnSuccess = $wrapper.find('.btn-success.btn-next');
 
         if((data.step === 1 && data.direction === 'next')) {
 
@@ -506,11 +544,10 @@ module.exports = Marionette.CompositeView.extend({
             } else {
                 return false;
             }
-
             $btnNext.show();
-            $btnNext.text('Далее ').
-            append('<i class="fa fa-arrow-right"></i>')
-                .removeClass('btn-success').addClass('btn-primary');
+            $btnSuccess.addClass("hidden");
+            self.withoutObject = false;
+
         } else if(data.step === 2 && data.direction === 'next') {
             themes = _.map($wrapper.find('.form2').serializeArray(), function (item) {
                 return item.value;
@@ -522,13 +559,36 @@ module.exports = Marionette.CompositeView.extend({
                 return false;
             }
 
+            this.queryObjectsList(function(objects){
+                $wrapper.find(".objects-selection").html(objectsTmpl({collection: objects}));
+                self.triggerMethod('fetched');
+            });
+
             $btnNext.show();
-            $btnNext.text(' Построить график').prepend('<i class="fa fa-check-circle"></i>')
-                .removeClass('btn-primary').addClass('btn-success');
+            $btnSuccess.addClass("hidden");
+            self.withoutObject = false;
 
-        } else if (data.step === 3 && data.direction === 'next' ) {
+        } else if(data.step === 3 && data.direction === 'next') {
 
-            var url = _.map($wrapper.find('.form3').serializeArray(), function (item) {
+            var objects = _.map($wrapper.find('.form3').serializeArray(), function (item) {
+                return item.value;
+            });
+
+            self.withoutObject = false;
+
+            if (objects.length > 0) {
+                this.model.set("object__in", JSON.stringify(objects));
+            } else {
+                this.model.unset("object__in");
+                self.withoutObject = true;
+            }
+
+            $btnNext.hide();
+            $btnSuccess.removeClass("hidden");
+
+        } else if (data.step === 4 && data.direction === 'next' ) {
+
+            var url = _.map($wrapper.find('.form4').serializeArray(), function (item) {
                 return item.value;
             });
 
@@ -539,27 +599,35 @@ module.exports = Marionette.CompositeView.extend({
                 return false;
             }
 
+            if (this.withoutObject === true) {
+                titleKey = "key_word__in";
+            } else {
+                var titleKey = "object__in";
+                this.model.set("url", url[0].replace("keyword", "object"));
+            }
+
             this.ui.dynamicChart = $wrapper.find(".demo-vertical-bar-chart");
-            $wrapper.find(".sd-chart-title").html(JSON.parse(this.model.get("key_word__in")).join());
+
+            $wrapper.find(".sd-chart-title").html(JSON.parse(this.model.get(titleKey)).join());
+
             $wrapper.find(".sd-chart-list").html(listTemplate);
             this.triggerMethod('fetched');
             this.triggerMethod("updateDateControls", $wrapper.find(".time-range"), $wrapper.find(".time-range input"), this.options);
-            this.query();
+            this.query("object");
             $btnNext.hide();
+            $btnSuccess.addClass("hidden");
 
-        } else if (data.step === 4 && data.direction === 'previous'){
-            $btnNext.show();
-            $btnNext.text(' Построить график').prepend('<i class="fa fa-check-circle"></i>')
-                .removeClass('btn-primary').addClass('btn-success');
+        } else if (data.step === 5 && data.direction === 'previous'){
+            $btnNext.hide();
+            $btnSuccess.removeClass("hidden");
         } else {
             $btnNext.show();
-            $btnNext.text('Далее ').
-            append('<i class="fa fa-arrow-right"></i>')
-                .removeClass('btn-success').addClass('btn-primary');
+            $btnSuccess.addClass("hidden");
         }
     },
 
     wizardNext: function (event) {
+        this.isSuccessButton = this.$(event.target).hasClass('btn-success');
         this.$(event.target).parents(".wizard-wrapper").find(".wizard").wizard('next');
     },
 
