@@ -1,4 +1,4 @@
-//keyword-chart-fg-sd.js
+//keyword-object-chart-sd.js
 
 var Backbone = require('backbone');
 var Marionette = require('backbone.marionette');

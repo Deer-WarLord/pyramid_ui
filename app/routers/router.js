@@ -40,8 +40,8 @@ module.exports = Marionette.AppRouter.extend({
         'general-social-demo-rating-by-publication-fg(/:fromDate/:toDate)': 'generalSocialDemoRatingPublicationAggregatorFG',
 
         'chart-keyword/': "chartKeyword",
-        'chart-keyword-fg/': "chartKeywordFg",
-        'chart-keyword-fg-sd/': "chartKeywordFgSd",
+        'chart-keyword-object-view/': "chartKeywordFg",
+        'chart-keyword-object-sd/': "chartKeywordFgSd",
 
         'admin-data-uploader': 'admin_data_uploader',
         'admin-user-roles': 'admin_user_roles',

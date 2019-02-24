@@ -183,14 +183,14 @@ module.exports = Marionette.ItemView.extend({
     keywordChartFg: function () {
         this.activateKeywordFgChart();
         this.model.clear();
-        this.model.set("history", "chart-keyword-fg/");
+        this.model.set("history", "chart-keyword-object-view/");
         this.triggerMethod('show:chart:keyword:fg');
     },
 
     keywordChartFgSd: function () {
         this.activateKeywordFgSdChart();
         this.model.clear();
-        this.model.set("history", "chart-keyword-fg-sd/");
+        this.model.set("history", "chart-keyword-object-sd/");
         this.triggerMethod('show:chart:keyword:fg:sd');
     },
 

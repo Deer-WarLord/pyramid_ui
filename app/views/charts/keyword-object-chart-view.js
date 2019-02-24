@@ -1,4 +1,4 @@
-//keyword-chart-fg.js
+//keyword-object-chart-view.js
 
 var Backbone = require('backbone');
 var Marionette = require('backbone.marionette');
@@ -402,6 +402,7 @@ module.exports = Marionette.CompositeView.extend({
             var url = _.map($wrapper.find('.form4').serializeArray(), function (item) {
                 return item.value;
             });
+            var groupBy = "key_word";
 
             if (url.length > 0) {
                 this.model.set("url", url[0]);
@@ -414,6 +415,7 @@ module.exports = Marionette.CompositeView.extend({
             } else {
                 var titleKey = "object__in";
                 this.model.set("url", url[0].replace("keyword", "object"));
+                groupBy = "object";
             }
 
             this.ui.dynamicChart = $wrapper.find(".demo-vertical-bar-chart");
@@ -422,7 +424,7 @@ module.exports = Marionette.CompositeView.extend({
 
             this.triggerMethod('fetched');
             this.triggerMethod("updateDateControls", $wrapper.find(".time-range"), $wrapper.find(".time-range input"), this.options);
-            this.query("object");
+            this.query(groupBy);
             $btnNext.hide();
             $btnSuccess.addClass("hidden");
 
