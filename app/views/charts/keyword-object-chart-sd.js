@@ -231,7 +231,7 @@ module.exports = Marionette.CompositeView.extend({
 
     tagName: 'div',
     className: 'main-content',
-    template: require('../../templates/charts/keyword-chart-sd.html'),
+    template: require('../../templates/charts/keyword-object-chart-sd.html'),
 
     childView: ThemeItem,
     childViewContainer: '.markets-selection',
@@ -523,7 +523,7 @@ module.exports = Marionette.CompositeView.extend({
     },
 
     addChart: function (event) {
-        var chartSdTmpl = require('../../templates/charts/keyword-chart-sd-tmpl.html');
+        var chartSdTmpl = require('../../templates/charts/keyword-object-chart-sd-tmpl.html');
         this.$el.append(chartSdTmpl({"uid": Math.round(event.timeStamp)}));
         this.$(".markets-selection").html(simpleMarketsTmpl({collection: this.collection.toJSON()}));
         this.triggerMethod('fetched');

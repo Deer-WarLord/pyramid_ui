@@ -49,7 +49,7 @@ module.exports = Marionette.CompositeView.extend({
 
     tagName: 'div',
     className: 'main-content',
-    template: require('../../templates/charts/keyword-chart-fg.html'),
+    template: require('../../templates/charts/keyword-object-chart-view.html'),
 
     childView: ThemeItem,
     childViewContainer: '.markets-selection',
