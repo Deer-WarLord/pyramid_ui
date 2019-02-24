@@ -1,3 +1,5 @@
+//keyword-chart-fg.js
+
 var Backbone = require('backbone');
 var Marionette = require('backbone.marionette');
 var Cookies = require('js-cookie');
@@ -89,6 +91,7 @@ module.exports = Marionette.CompositeView.extend({
     events: {
         'change @ui.input': 'filterCollectionDates',
         'change @ui.wizard': "wizardChange",
+        'stepclick @ui.wizard': "stepClick",
         'click @ui.wizardNext': "wizardNext",
         'click @ui.wizardPrev': "wizardPrev"
     },
@@ -110,14 +113,16 @@ module.exports = Marionette.CompositeView.extend({
 
     query: function(groupBy) {
         var self = this;
+        //(groupBy === "key_word") ? "/charts/keyword/" : "/charts/object/",
+        var url = this.model.get("url") || "/charts/keyword-fg/";
         $.ajax({
             beforeSend: function(xhr, settings) {
                 xhr.setRequestHeader("X-CSRFToken", Cookies.get('csrftoken'));
             },
             dataType: "json",
             contentType: "application/json",
-            url: (groupBy === "key_word") ? "/charts/keyword-fg/" : "/charts/object-fg/",
-            data: this.model.toJSON(),
+            url: url,
+            data: _.omit(this.model.toJSON(), "url"),
             success: function( respond, textStatus, jqXHR ){
                 self.buildDynamicGraph(self.processGraphData(respond, groupBy), groupBy);
                 self.buildCircleGraph(self.processCircleGraphData(respond, groupBy), groupBy);
@@ -300,6 +305,38 @@ module.exports = Marionette.CompositeView.extend({
         });
     },
 
+    stepClick: function(e, data) {
+        var self = this;
+        var $wrapper = $(e.target).parents(".wizard-wrapper");
+        var $btnNext = $wrapper.find('.btn-primary.btn-next');
+        var $btnSuccess = $wrapper.find('.btn-success.btn-next');
+        if (data.step === 4){
+            $btnNext.hide();
+            $btnSuccess.removeClass("hidden");
+        } else if (data.step === 3) {
+            self.model.unset("object__in");
+            self.model.unset("url");
+            $btnNext.show();
+            $btnSuccess.addClass("hidden");
+            self.queryObjectsList(function(objects){
+                $wrapper.find(".objects-selection").html(objectsTmpl({collection: objects}));
+                self.triggerMethod('fetched');
+            });
+        } else if (data.step === 2) {
+            self.model.unset("object__in");
+            self.model.unset("url");
+            $btnNext.show();
+            $btnSuccess.addClass("hidden");
+            self.withoutObject = false;
+        } else if (data.step === 1) {
+            self.model.unset("object__in");
+            self.model.unset("url");
+            $btnNext.show();
+            $btnSuccess.addClass("hidden");
+            self.withoutObject = false;
+        }
+    },
+
     wizardChange: function (e, data) {
 
         var self = this;
@@ -307,16 +344,7 @@ module.exports = Marionette.CompositeView.extend({
         var $btnNext = $wrapper.find('.btn-primary.btn-next');
         var $btnSuccess = $wrapper.find('.btn-success.btn-next');
 
-        if (self.withoutObject === true) {
-            this.ui.dynamicChart = $wrapper.find(".demo-vertical-bar-chart");
-            $wrapper.find(".sd-chart-title").html(JSON.parse(this.model.get("key_word__in")).join());
-            this.triggerMethod('fetched');
-            this.triggerMethod("updateDateControls", $wrapper.find(".time-range"), $wrapper.find(".time-range input"), this.options);
-            this.query("key_word");
-            $btnSuccess.removeClass("hidden");
-            $btnNext.hide();
-            $btnSuccess.addClass("hidden");
-        } else if((data.step === 1 && data.direction === 'next')) {
+        if((data.step === 1 && data.direction === 'next')) {
 
             var markets = _.map($wrapper.find('.form1').serializeArray(), function (item) { return item.value; });
 
@@ -327,9 +355,9 @@ module.exports = Marionette.CompositeView.extend({
             } else {
                 return false;
             }
-
             $btnNext.show();
-            $btnSuccess.removeClass("hidden");
+            $btnSuccess.addClass("hidden");
+            self.withoutObject = false;
 
         } else if(data.step === 2 && data.direction === 'next') {
             themes = _.map($wrapper.find('.form2').serializeArray(), function (item) {
@@ -342,19 +370,14 @@ module.exports = Marionette.CompositeView.extend({
                 return false;
             }
 
-            if (this.isSuccessButton === true) {
-                setTimeout(function() {
-                    self.withoutObject = true;
-                    self.ui.wizardNext.click();
-                }, 10);
-            } else {
-                this.queryObjectsList(function(objects){
-                    $wrapper.find(".objects-selection").html(objectsTmpl({collection: objects}));
-                    self.triggerMethod('fetched');
-                });
-                $btnNext.hide();
-                self.withoutObject = false;
-            }
+            this.queryObjectsList(function(objects){
+                $wrapper.find(".objects-selection").html(objectsTmpl({collection: objects}));
+                self.triggerMethod('fetched');
+            });
+
+            $btnNext.show();
+            $btnSuccess.addClass("hidden");
+            self.withoutObject = false;
 
         } else if(data.step === 3 && data.direction === 'next') {
 
@@ -362,22 +385,48 @@ module.exports = Marionette.CompositeView.extend({
                 return item.value;
             });
 
+            self.withoutObject = false;
+
             if (objects.length > 0) {
                 this.model.set("object__in", JSON.stringify(objects));
+            } else {
+                this.model.unset("object__in");
+                self.withoutObject = true;
+            }
+
+            $btnNext.hide();
+            $btnSuccess.removeClass("hidden");
+
+        } else if (data.step === 4 && data.direction === 'next' ) {
+
+            var url = _.map($wrapper.find('.form4').serializeArray(), function (item) {
+                return item.value;
+            });
+
+            if (url.length > 0) {
+                this.model.set("url", url[0]);
             } else {
                 return false;
             }
 
+            if (this.withoutObject === true) {
+                titleKey = "key_word__in";
+            } else {
+                var titleKey = "object__in";
+                this.model.set("url", url[0].replace("keyword", "object"));
+            }
+
             this.ui.dynamicChart = $wrapper.find(".demo-vertical-bar-chart");
-            $wrapper.find(".sd-chart-title").html(JSON.parse(this.model.get("object__in")).join());
+
+            $wrapper.find(".sd-chart-title").html(JSON.parse(this.model.get(titleKey)).join());
+
             this.triggerMethod('fetched');
             this.triggerMethod("updateDateControls", $wrapper.find(".time-range"), $wrapper.find(".time-range input"), this.options);
             this.query("object");
             $btnNext.hide();
             $btnSuccess.addClass("hidden");
-            self.withoutObject = false;
 
-        } else if (data.step === 4 && data.direction === 'previous'){
+        } else if (data.step === 5 && data.direction === 'previous'){
             $btnNext.hide();
             $btnSuccess.removeClass("hidden");
         } else {

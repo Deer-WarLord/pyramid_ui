@@ -1,3 +1,5 @@
+//keyword-chart-fg-sd.js
+
 var Backbone = require('backbone');
 var Marionette = require('backbone.marionette');
 var Cookies = require('js-cookie');
@@ -286,6 +288,7 @@ module.exports = Marionette.CompositeView.extend({
         'change @ui.input': 'filterCollectionDates',
         'click @ui.addChart': "addChart",
         'change @ui.wizard': "wizardChange",
+        'stepclick @ui.wizard': "stepClick",
         'click @ui.wizardNext': "wizardNext",
         'click @ui.wizardPrev': "wizardPrev"
     },
@@ -524,6 +527,38 @@ module.exports = Marionette.CompositeView.extend({
         this.$el.append(chartSdTmpl({"uid": Math.round(event.timeStamp)}));
         this.$(".markets-selection").html(simpleMarketsTmpl({collection: this.collection.toJSON()}));
         this.triggerMethod('fetched');
+    },
+
+    stepClick: function(e, data) {
+        var self = this;
+        var $wrapper = $(e.target).parents(".wizard-wrapper");
+        var $btnNext = $wrapper.find('.btn-primary.btn-next');
+        var $btnSuccess = $wrapper.find('.btn-success.btn-next');
+        if (data.step === 4){
+            $btnNext.hide();
+            $btnSuccess.removeClass("hidden");
+        } else if (data.step === 3) {
+            self.model.unset("object__in");
+            self.model.unset("url");
+            $btnNext.show();
+            $btnSuccess.addClass("hidden");
+            self.queryObjectsList(function(objects){
+                $wrapper.find(".objects-selection").html(objectsTmpl({collection: objects}));
+                self.triggerMethod('fetched');
+            });
+        } else if (data.step === 2) {
+            self.model.unset("object__in");
+            self.model.unset("url");
+            $btnNext.show();
+            $btnSuccess.addClass("hidden");
+            self.withoutObject = false;
+        } else if (data.step === 1) {
+            self.model.unset("object__in");
+            self.model.unset("url");
+            $btnNext.show();
+            $btnSuccess.addClass("hidden");
+            self.withoutObject = false;
+        }
     },
 
     wizardChange: function (e, data) {
