@@ -1,3 +1,5 @@
+// keyword-chart.js
+
 var Backbone = require('backbone');
 var Marionette = require('backbone.marionette');
 var Cookies = require('js-cookie');
@@ -19,7 +21,6 @@ var objectsTmpl = _.template(
     '    <% } %>\n' +
     '</optgroup>\n' +
     '<% } %>');
-
 
 var Themes = Backbone.Collection.extend({
     url: 'charts/themes'
@@ -47,7 +48,7 @@ module.exports = Marionette.CompositeView.extend({
 
     tagName: 'div',
     className: 'main-content',
-    template: require('../../templates/charts/keyword-chart-fg.html'),
+    template: require('../../templates/charts/keyword-object-chart-amount.html'),
 
     childView: ThemeItem,
     childViewContainer: '.markets-selection',
@@ -89,6 +90,7 @@ module.exports = Marionette.CompositeView.extend({
     events: {
         'change @ui.input': 'filterCollectionDates',
         'change @ui.wizard': "wizardChange",
+        'stepclick @ui.wizard': "stepClick",
         'click @ui.wizardNext': "wizardNext",
         'click @ui.wizardPrev': "wizardPrev"
     },
@@ -116,9 +118,9 @@ module.exports = Marionette.CompositeView.extend({
             },
             dataType: "json",
             contentType: "application/json",
-            url: (groupBy === "key_word") ? "/charts/keyword-fg/" : "/charts/object-fg/",
+            url: (groupBy === "key_word") ? "/charts/keyword/" : "/charts/object/",
             data: this.model.toJSON(),
-            success: function( respond, textStatus, jqXHR ){
+            success: function(respond, textStatus, jqXHR ){
                 self.buildDynamicGraph(self.processGraphData(respond, groupBy), groupBy);
                 self.buildCircleGraph(self.processCircleGraphData(respond, groupBy), groupBy);
             },
@@ -165,57 +167,57 @@ module.exports = Marionette.CompositeView.extend({
         var minDate = new Date(_.min(data, function(item) {return new Date(item.date)}).date);
         minDate.setDate(minDate.getDate() - 6);
         var dateDict = _.chain(data)
-            .map(function(item){ return item.date; })
-            .uniq()
-            .sortBy(function(item) {return new Date(item)})
-            .map(function (item) { return {x: item, y: 0};})
-            .value();
+                        .map(function(item){ return item.date; })
+                        .uniq()
+                        .sortBy(function(item) {return new Date(item)})
+                        .map(function (item) { return {x: item, y: 0};})
+                        .value();
         return [_.chain(data)
-            .groupBy(function(item) { return item[groupBy]; })
-            .mapObject(function(val, key) {
-                return _.chain(val)
-                    .map(function(item){
-                        return { x: item.date, y: item.views};
-                    })
-                    .sortBy(function(item) { return new Date(item.x); })
-                    .union(dateDict)
-                    .uniq("x")
-                    .sortBy(function(item) { return new Date(item.x); })
-                    .value();
-            })
-            .pairs()
-            .map(function (item) {
-                return {
-                    label: item[0],
-                    data: item[1],
-                    backgroundColor: self.stringToColour(item[0]),
-                    borderColor : "#111",
-                    borderWidth : 1
-                };
-            })
-            .value(), minDate, maxDate];
+                .groupBy(function(item) { return item[groupBy]; })
+                .mapObject(function(val, key) {
+                    return _.chain(val)
+                            .map(function(item){
+                                return { x: item.date, y: item.publication_amount};
+                            })
+                            .sortBy(function(item) { return new Date(item.x); })
+                            .union(dateDict)
+                            .uniq("x")
+                            .sortBy(function(item) { return new Date(item.x); })
+                            .value();
+                })
+                .pairs()
+                .map(function (item) {
+                    return {
+                        label: item[0],
+                        data: item[1],
+                        backgroundColor: self.stringToColour(item[0]),
+                        borderColor : "#111",
+                        borderWidth : 1
+                    };
+                })
+                .value(), minDate, maxDate];
     },
 
     processCircleGraphData: function (data, groupBy) {
         var self = this;
         var results =  _.chain(data)
-            .groupBy(function(item) { return item[groupBy]; })
-            .mapObject(function(val, key) {
-                return _.reduce(val, function(memo, item){
-                    return memo + item.views;
-                }, 0);
-            })
-            .pairs()
-            .map(function (item) {
-                return {
-                    label: item[0],
-                    data: item[1],
-                    backgroundColor: self.stringToColour(item[0]),
-                    borderColor : "#111",
-                    borderWidth : 1
-                };
-            })
-            .value();
+                        .groupBy(function(item) { return item[groupBy]; })
+                        .mapObject(function(val, key) {
+                            return _.reduce(val, function(memo, item){
+                                return memo + item.publication_amount;
+                            }, 0);
+                        })
+                        .pairs()
+                        .map(function (item) {
+                            return {
+                                label: item[0],
+                                data: item[1],
+                                backgroundColor: self.stringToColour(item[0]),
+                                borderColor : "#111",
+                                borderWidth : 1
+                            };
+                        })
+                        .value();
 
         var total = results.reduce(function(memo, item) {
             return memo + item.data
@@ -250,6 +252,42 @@ module.exports = Marionette.CompositeView.extend({
                                 max: data[2]
                             }
                         }]
+                    },
+                    'onClick' : function (evt, item) {
+                        var el = this.getElementAtEvent(evt);
+                        if (el.length > 0) {
+                            var groupByItem = this.data.datasets[el[0]._datasetIndex].label;
+                            var toDate = this.data.datasets[el[0]._datasetIndex].data[el[0]._index].x;
+                            var fromDate = new Date(toDate);
+                            fromDate.setDate(fromDate.getDate() - 6);
+                            fromDate = moment(fromDate).format('YYYY-MM-DD');
+                            var url = '/noksfishes/publications-title-date/?' + groupBy + '=' +
+                                        groupByItem +
+                                        '&posted_date__lte=' + toDate +
+                                        '&posted_date__gte=' + fromDate;
+                            $.ajax({
+                                beforeSend: function(xhr) {
+                                    xhr.setRequestHeader("X-CSRFToken", Cookies.get('csrftoken'));
+                                },
+                                url: url,
+                                type: 'GET',
+                                success: function(data, status, callback) {
+                                    var table = self.$("#publications-list").DataTable({
+                                        bDestroy: true,
+                                        sDom: "t",
+                                        data: data,
+                                        scrollY: "300px",
+                                        scrollCollapse: true,
+                                        paging: false,
+                                        columns: [
+                                            { data: 'title' },
+                                            { data: 'posted_date' },
+                                            { data: 'count' }
+                                        ]
+                                    });
+                                }
+                            });
+                        }
                     }
                 }
             });
@@ -300,6 +338,31 @@ module.exports = Marionette.CompositeView.extend({
         });
     },
 
+    stepClick: function(e, data) {
+        var self = this;
+        var $wrapper = $(e.target).parents(".wizard-wrapper");
+        var $btnNext = $wrapper.find('.btn-primary.btn-next');
+        var $btnSuccess = $wrapper.find('.btn-success.btn-next');
+        if (data.step === 3) {
+            $btnNext.hide();
+            $btnSuccess.removeClass("hidden");
+            self.queryObjectsList(function(objects){
+                $wrapper.find(".objects-selection").html(objectsTmpl({collection: objects}));
+                self.triggerMethod('fetched');
+            });
+        } else if (data.step === 2) {
+            self.model.unset("object__in");
+            $btnNext.show();
+            $btnSuccess.removeClass("hidden");
+            self.withoutObject = false;
+        } else if (data.step === 1) {
+            self.model.unset("object__in");
+            $btnNext.show();
+            $btnSuccess.addClass("hidden");
+            self.withoutObject = false;
+        }
+    },
+
     wizardChange: function (e, data) {
 
         var self = this;
@@ -327,7 +390,7 @@ module.exports = Marionette.CompositeView.extend({
             } else {
                 return false;
             }
-
+            self.withoutObject = false;
             $btnNext.show();
             $btnSuccess.removeClass("hidden");
 

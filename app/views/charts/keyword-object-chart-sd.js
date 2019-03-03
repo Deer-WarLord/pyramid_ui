@@ -1,3 +1,5 @@
+//keyword-object-chart-sd.js
+
 var Backbone = require('backbone');
 var Marionette = require('backbone.marionette');
 var Cookies = require('js-cookie');
@@ -165,10 +167,10 @@ var fgListTmpl = "<div class=\"control-inline toolbar-item-group sd-chart-list\"
 
 var admixerListTmpl = "<div class=\"control-inline toolbar-item-group sd-chart-list\">\n" +
     "<select class=\"sd-list\" name=\"sdList\">\n" +
+        "<option value=\"gender\">Гендер</option>\n" +
         "<option value=\"platform\">Платформа</option>\n" +
         "<option value=\"browser\">Браузер</option>\n" +
         "<option value=\"age\">Возраст</option>\n" +
-        "<option value=\"gender\">Гендер</option>\n" +
         "<!--<option value=\"region\">Регион</option>-->\n" +
         "<!--<option value=\"income\">Групп населения</option>-->\n" +
     "</select>\n" +
@@ -188,6 +190,20 @@ var marketsTmpl = _.template(
 var simpleMarketsTmpl = _.template(
     '<% for(var i in collection) { %>\n' +
     '<option value="<%= collection[i].market %>"><%= collection[i].market %></option>\n' +
+    '<% } %>');
+
+var objectsTmpl = _.template(
+    '<% for(var i in collection) { %>\n' +
+    '<optgroup label="<%= collection[i].key_word %>">\n' +
+    '    <% for(var j in collection[i].objects) { %>\n' +
+    '    <option value="<%= collection[i].objects[j] %>"><%= collection[i].objects[j] %></option>\n' +
+    '    <% } %>\n' +
+    '</optgroup>\n' +
+    '<% } %>');
+
+var simpleObjectsTmpl = _.template(
+    '<% for(var i in collection) { %>\n' +
+    '<option value="<%= collection[i].object %>"><%= collection[i].object %></option>\n' +
     '<% } %>');
 
 var Themes = Backbone.Collection.extend({
@@ -215,7 +231,7 @@ module.exports = Marionette.CompositeView.extend({
 
     tagName: 'div',
     className: 'main-content',
-    template: require('../../templates/charts/keyword-chart-sd.html'),
+    template: require('../../templates/charts/keyword-object-chart-sd.html'),
 
     childView: ThemeItem,
     childViewContainer: '.markets-selection',
@@ -229,6 +245,7 @@ module.exports = Marionette.CompositeView.extend({
         "addChart": "#add-chart",
         "selectMarket": ".markets-selection",
         "selectThemeCompany": "select.themes-selection",
+        "selectObject": "select.objects-selection",
         "wizard": ".wizard",
         "wizardNext": ".wizard-wrapper .btn-next",
         "wizardPrev": ".wizard-wrapper .btn-prev"
@@ -245,6 +262,9 @@ module.exports = Marionette.CompositeView.extend({
                 }
             },
             '@ui.selectThemeCompany': {
+                "select2": {}
+            },
+            '@ui.selectObject': {
                 "select2": {}
             },
             '@ui.sdList': {
@@ -268,6 +288,7 @@ module.exports = Marionette.CompositeView.extend({
         'change @ui.input': 'filterCollectionDates',
         'click @ui.addChart': "addChart",
         'change @ui.wizard': "wizardChange",
+        'stepclick @ui.wizard': "stepClick",
         'click @ui.wizardNext': "wizardNext",
         'click @ui.wizardPrev': "wizardPrev"
     },
@@ -275,7 +296,9 @@ module.exports = Marionette.CompositeView.extend({
     filterCollectionSd: function(event, val, isTrue) {
         this.model.set("sd", val);
         this.ui.dynamicChart = this.$(event.target).parents(".widget").find(".demo-vertical-bar-chart");
-        this.query();
+        var url = this.model.get("url") || "/charts/keyword-fg-sd/";
+        var sdMap = (url.includes("-fg-")) ? FACTRUM_SD_MAP : ADMIXER_SD_MAP;
+        this.buildDynamicGraph(this.processGraphData(this.respond, sdMap, url, val));
     },
 
     filterCollectionDates: function(event, data) {
@@ -288,14 +311,15 @@ module.exports = Marionette.CompositeView.extend({
                 "posted_date__lte": data.toDate
             });
             this.ui.dynamicChart = this.$(event.target).parents(".widget").find(".demo-vertical-bar-chart");
-            this.query();
+            this.query((self.model.has("object__in")) ? "object" : "key_word");
         } else {
             console.log("Some value is empty!");
         }
     },
 
-    query: function() {
+    query: function(groupBy) {
         var self = this;
+        //(groupBy === "key_word") ? "/charts/keyword/" : "/charts/object/",
         var url = this.model.get("url") || "/charts/keyword-fg-sd/";
         var sdMap = (url.includes("-fg-")) ? FACTRUM_SD_MAP : ADMIXER_SD_MAP;
         $.ajax({
@@ -307,8 +331,26 @@ module.exports = Marionette.CompositeView.extend({
             url: url,
             data: _.omit(this.model.toJSON(), "url"),
             success: function( respond, textStatus, jqXHR ){
-                self.buildDynamicGraph(self.processGraphData(respond, sdMap, url));
+                self.respond = respond;
+                self.buildDynamicGraph(self.processGraphData(respond, sdMap, url, groupBy));
             },
+            error: function( jqXHR, textStatus, errorThrown ){
+                console.log(jqXHR);
+            }
+        });
+    },
+
+    queryObjectsList: function(successCb) {
+        var self = this;
+        $.ajax({
+            beforeSend: function(xhr, settings) {
+                xhr.setRequestHeader("X-CSRFToken", Cookies.get('csrftoken'));
+            },
+            dataType: "json",
+            contentType: "application/json",
+            url: "/charts/objects/",
+            data: this.model.toJSON(),
+            success: successCb,
             error: function( jqXHR, textStatus, errorThrown ){
                 console.log(jqXHR);
             }
@@ -328,7 +370,7 @@ module.exports = Marionette.CompositeView.extend({
         return colour;
     },
 
-    processGraphData: function (data, sdMap, url) {
+    processGraphData: function (data, sdMap, url, groupBy) {
         var self = this;
         var sdKey = this.model.get("sd");
         var maxDate = new Date(_.max(data, function(item) {return new Date(item.date)}).date);
@@ -342,79 +384,51 @@ module.exports = Marionette.CompositeView.extend({
             .map(function (item) { return {x: item, y: 0};})
             .value();
 
-        if (sdKey === undefined){
-            var result = _.chain(data)
-                .groupBy(function(item) { return item.key_word; })
-                .mapObject(function(val, key) {
-                    return _.chain(val)
-                        .map(function(item){
-                            return { x: item.date, y: item.views};
-                        })
-                        .sortBy(function(item) { return new Date(item.x); })
-                        .union(dateDict)
-                        .uniq("x")
-                        .sortBy(function(item) { return new Date(item.x); })
-                        .value();
-                })
-                .pairs()
-                .map(function (item) {
-                    return {
-                        label: item[0],
-                        data: item[1],
-                        backgroundColor: self.stringToColour(item[0]),
-                        borderColor : "#111",
-                        borderWidth : 1
-                    };
-                })
-                .value();
-        } else {
-            result = {};
+        var result = {};
 
-            _.each(_.values(sdMap[sdKey]), function(el){
-                result[el] = [];
+        _.each(_.values(sdMap[sdKey]), function(el){
+            result[el] = [];
+        });
+
+        if (url.includes("-fg-") && !url.includes("object")) {
+            _.each(data, function (el_i) {
+                _.each(sdMap[sdKey], function (el_j_v, el_j_k) {
+                    var views = el_i[sdKey][el_j_k];
+                    views = (views !== undefined) ? views/100.0 * el_i.views : 0;
+                    result[el_j_v].push([el_i.date, views]);
+                })
             });
-
-            if (url.includes("-fg-")) {
-                _.each(data, function (el_i) {
-                    _.each(sdMap[sdKey], function (el_j_v, el_j_k) {
-                        var views = el_i[sdKey][el_j_k];
-                        views = (views !== undefined) ? views/100.0 * el_i.views : 0;
-                        result[el_j_v].push([el_i.date, views]);
-                    })
-                });
-            } else {
-                _.each(data, function (el_i) {
-                    _.each(sdMap[sdKey], function (el_j_v, el_j_k) {
-                        var views = el_i[sdKey][el_j_k];
-                        result[el_j_v].push([el_i.date, views]);
-                    })
-                });
-            }
-
-            result = _.chain(result).mapObject(function(val, key) {
-                    return _.chain(val)
-                            .groupBy(function(item) {return item[0];})
-                            .mapObject(function(val, key){
-                                return _.reduce(val, function(s, item) {
-                                    return s + item[1]}, 0);
-                            })
-                            .pairs().value();
-            }).pairs().map(function (item) {
-                return {
-                    label: item[0],
-                    data: _.chain(item[1])
-                            .sortBy(function (el) {
-                                return el[0];})
-                            .map(function(el){
-                                return {x:el[0], y:el[1]};})
-                            .value(),
-                    backgroundColor: self.stringToColour(item[0]),
-                    borderColor : "#111",
-                    borderWidth : 1
-                };
-            }).value();
-
+        } else {
+            _.each(data, function (el_i) {
+                _.each(sdMap[sdKey], function (el_j_v, el_j_k) {
+                    var views = el_i[sdKey][el_j_k];
+                    result[el_j_v].push([el_i.date, views]);
+                })
+            });
         }
+
+        result = _.chain(result).mapObject(function(val, key) {
+                return _.chain(val)
+                        .groupBy(function(item) {return item[0];})
+                        .mapObject(function(val, key){
+                            return _.reduce(val, function(s, item) {
+                                return s + item[1]}, 0);
+                        })
+                        .pairs().value();
+        }).pairs().map(function (item) {
+            return {
+                label: item[0],
+                data: _.chain(item[1])
+                        .sortBy(function (el) {
+                            return el[0];})
+                        .map(function(el){
+                            return {x:el[0], y:el[1]};})
+                        .value(),
+                backgroundColor: self.stringToColour(item[0]),
+                borderColor : "#111",
+                borderWidth : 1
+            };
+        }).value();
 
         return [result, minDate, maxDate];
     },
@@ -484,16 +498,53 @@ module.exports = Marionette.CompositeView.extend({
     },
 
     addChart: function (event) {
-        var chartSdTmpl = require('../../templates/charts/keyword-chart-sd-tmpl.html');
+        var chartSdTmpl = require('../../templates/charts/keyword-object-chart-sd-tmpl.html');
         this.$el.append(chartSdTmpl({"uid": Math.round(event.timeStamp)}));
         this.$(".markets-selection").html(simpleMarketsTmpl({collection: this.collection.toJSON()}));
         this.triggerMethod('fetched');
     },
 
+    stepClick: function(e, data) {
+        var self = this;
+        var $wrapper = $(e.target).parents(".wizard-wrapper");
+        var $btnNext = $wrapper.find('.btn-primary.btn-next');
+        var $btnSuccess = $wrapper.find('.btn-success.btn-next');
+        if (data.step === 4){
+            $btnNext.hide();
+            $btnSuccess.removeClass("hidden");
+        } else if (data.step === 3) {
+            self.model.unset("object__in");
+            self.model.unset("url");
+            self.model.unset("sd");
+            $btnNext.show();
+            $btnSuccess.addClass("hidden");
+            self.queryObjectsList(function(objects){
+                $wrapper.find(".objects-selection").html(objectsTmpl({collection: objects}));
+                self.triggerMethod('fetched');
+            });
+        } else if (data.step === 2) {
+            self.model.unset("object__in");
+            self.model.unset("url");
+            self.model.unset("sd");
+            $btnNext.show();
+            $btnSuccess.addClass("hidden");
+            self.withoutObject = false;
+        } else if (data.step === 1) {
+            self.model.unset("object__in");
+            self.model.unset("url");
+            self.model.unset("sd");
+            $btnNext.show();
+            $btnSuccess.addClass("hidden");
+            self.withoutObject = false;
+        }
+    },
+
     wizardChange: function (e, data) {
 
+        var self = this;
         var $wrapper = $(e.target).parents(".wizard-wrapper");
-        var $btnNext = $wrapper.find('.btn-next');
+        var $btnNext = $wrapper.find('.btn-primary.btn-next');
+        var $btnSuccess = $wrapper.find('.btn-success.btn-next');
 
         if((data.step === 1 && data.direction === 'next')) {
 
@@ -506,11 +557,10 @@ module.exports = Marionette.CompositeView.extend({
             } else {
                 return false;
             }
-
             $btnNext.show();
-            $btnNext.text('Далее ').
-            append('<i class="fa fa-arrow-right"></i>')
-                .removeClass('btn-success').addClass('btn-primary');
+            $btnSuccess.addClass("hidden");
+            self.withoutObject = false;
+
         } else if(data.step === 2 && data.direction === 'next') {
             themes = _.map($wrapper.find('.form2').serializeArray(), function (item) {
                 return item.value;
@@ -522,44 +572,84 @@ module.exports = Marionette.CompositeView.extend({
                 return false;
             }
 
+            this.queryObjectsList(function(objects){
+                $wrapper.find(".objects-selection").html(objectsTmpl({collection: objects}));
+                self.triggerMethod('fetched');
+            });
+
             $btnNext.show();
-            $btnNext.text(' Построить график').prepend('<i class="fa fa-check-circle"></i>')
-                .removeClass('btn-primary').addClass('btn-success');
+            $btnSuccess.addClass("hidden");
+            self.withoutObject = false;
 
-        } else if (data.step === 3 && data.direction === 'next' ) {
+        } else if(data.step === 3 && data.direction === 'next') {
 
-            var url = _.map($wrapper.find('.form3').serializeArray(), function (item) {
+            var objects = _.map($wrapper.find('.form3').serializeArray(), function (item) {
                 return item.value;
             });
 
-            if (url.length > 0) {
-                this.model.set("url", url[0]);
-                var listTemplate = (url[0].includes("-fg-")) ? fgListTmpl : admixerListTmpl;
+            self.withoutObject = false;
+
+            if (objects.length > 0) {
+                this.model.set("object__in", JSON.stringify(objects));
             } else {
+                this.model.unset("object__in");
+                self.withoutObject = true;
+            }
+
+            $btnNext.hide();
+            $btnSuccess.removeClass("hidden");
+
+        } else if (data.step === 4 && data.direction === 'next' ) {
+
+            var url = _.map($wrapper.find('.form4').serializeArray(), function (item) {
+                return item.value;
+            });
+
+            if (url.length <= 0) {
                 return false;
             }
 
+            this.model.set("url", url[0]);
+            if (url[0].includes("-fg-")) {
+                var listTemplate = fgListTmpl;
+                this.model.set("sd", "sex");
+            } else {
+                listTemplate = admixerListTmpl;
+                this.model.set("sd", "gender");
+            }
+
+            var groupBy = "key_word";
+            if (this.withoutObject === true) {
+                titleKey = "key_word__in";
+
+            } else {
+                var titleKey = "object__in";
+                this.model.set("url", url[0].replace("keyword", "object"));
+                groupBy = "object";
+            }
+
             this.ui.dynamicChart = $wrapper.find(".demo-vertical-bar-chart");
-            $wrapper.find(".sd-chart-title").html(JSON.parse(this.model.get("key_word__in")).join());
+
+            $wrapper.find(".sd-chart-title").html(JSON.parse(this.model.get(titleKey)).join());
+
             $wrapper.find(".sd-chart-list").html(listTemplate);
             this.triggerMethod('fetched');
             this.triggerMethod("updateDateControls", $wrapper.find(".time-range"), $wrapper.find(".time-range input"), this.options);
-            this.query();
+            this.query(groupBy);
             $btnNext.hide();
+            $btnSuccess.addClass("hidden");
 
-        } else if (data.step === 4 && data.direction === 'previous'){
-            $btnNext.show();
-            $btnNext.text(' Построить график').prepend('<i class="fa fa-check-circle"></i>')
-                .removeClass('btn-primary').addClass('btn-success');
+        } else if (data.step === 5 && data.direction === 'previous'){
+            $btnNext.hide();
+            $btnSuccess.removeClass("hidden");
         } else {
             $btnNext.show();
-            $btnNext.text('Далее ').
-            append('<i class="fa fa-arrow-right"></i>')
-                .removeClass('btn-success').addClass('btn-primary');
+            $btnSuccess.addClass("hidden");
         }
     },
 
     wizardNext: function (event) {
+        this.isSuccessButton = this.$(event.target).hasClass('btn-success');
         this.$(event.target).parents(".wizard-wrapper").find(".wizard").wizard('next');
     },
 

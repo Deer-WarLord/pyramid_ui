@@ -10,9 +10,9 @@ var PublicationTopicRating = require('./publication_topic_rating/table');
 var PublicationRating = require('./publication_rating/table');
 var SocialDemoRatingAdmixer = require('./social_demo_rating/table_admixer');
 var SocialDemoRatingFG = require('./social_demo_rating/table_fg');
-var KeywordChart = require('./charts/keyword-chart');
-var KeywordChartFg = require('./charts/keyword-chart-fg');
-var KeywordChartFgSd = require('./charts/keyword-chart-fg-sd');
+var KeywordObjectChartAmount = require('./charts/keyword-object-chart-amount');
+var KeywordObjectChartView = require('./charts/keyword-object-chart-view');
+var KeywordObjectChartSd = require('./charts/keyword-object-chart-sd');
 
 var AdminDataUploader = require('./admin/DataUploader');
 var AdminUserRoles = require('./admin/UserRoles');
@@ -374,7 +374,7 @@ module.exports = Marionette.LayoutView.extend({
         if (this.initialData.permissions.theme) {
             this.showBars();
             this.$(this.regions.keyword_chart).show();
-            this.showChildView('keyword_chart', new KeywordChart({
+            this.showChildView('keyword_chart', new KeywordObjectChartAmount({
                 model: this.model,
                 permissions: this.initialData.permissions,
                 fixed_dates: this.initialData.dates
@@ -386,7 +386,7 @@ module.exports = Marionette.LayoutView.extend({
         if (this.initialData.permissions.theme) {
             this.showBars();
             this.$(this.regions.keyword_chart).show();
-            this.showChildView('keyword_chart', new KeywordChartFg({
+            this.showChildView('keyword_chart', new KeywordObjectChartView({
                 model: this.model,
                 permissions: this.initialData.permissions,
                 fixed_dates: this.initialData.dates
@@ -398,7 +398,7 @@ module.exports = Marionette.LayoutView.extend({
         if (this.initialData.permissions.theme) {
             this.showBars();
             this.$(this.regions.keyword_chart).show();
-            this.showChildView('keyword_chart', new KeywordChartFgSd({
+            this.showChildView('keyword_chart', new KeywordObjectChartSd({
                 model: this.model,
                 permissions: this.initialData.permissions,
                 fixed_dates: this.initialData.dates
