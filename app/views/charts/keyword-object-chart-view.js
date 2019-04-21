@@ -420,7 +420,9 @@ module.exports = Marionette.CompositeView.extend({
 
             this.ui.dynamicChart = $wrapper.find(".demo-vertical-bar-chart");
 
-            $wrapper.find(".sd-chart-title").html(JSON.parse(this.model.get(titleKey)).join());
+            var provider = url[0].includes("-fg") ? "Factum" : "Admixer";
+
+            $wrapper.find(".sd-chart-title").html(JSON.parse(this.model.get(titleKey)).join() + " " + provider);
 
             this.triggerMethod('fetched');
             this.triggerMethod("updateDateControls", $wrapper.find(".time-range"), $wrapper.find(".time-range input"), this.options, this.model);

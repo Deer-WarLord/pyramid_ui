@@ -612,10 +612,12 @@ module.exports = Marionette.CompositeView.extend({
             this.model.set("url", url[0]);
             if (url[0].includes("-fg-")) {
                 var listTemplate = fgListTmpl;
+                var provider = "Factum";
                 this.model.set("sd", "sex");
             } else {
                 listTemplate = admixerListTmpl;
                 this.model.set("sd", "gender");
+                provider = "Admixer";
             }
 
             var groupBy = "key_word";
@@ -630,7 +632,7 @@ module.exports = Marionette.CompositeView.extend({
 
             this.ui.dynamicChart = $wrapper.find(".demo-vertical-bar-chart");
 
-            $wrapper.find(".sd-chart-title").html(JSON.parse(this.model.get(titleKey)).join());
+            $wrapper.find(".sd-chart-title").html(JSON.parse(this.model.get(titleKey)).join() + " " + provider);
 
             $wrapper.find(".sd-chart-list").html(listTemplate);
             this.triggerMethod('fetched');
