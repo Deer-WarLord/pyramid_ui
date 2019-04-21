@@ -1,4 +1,4 @@
-// theme_company_rating_table
+// market_rating_table
 var Marionette = require('backbone.marionette');
 var MarketRatingCollection = require('../../collections/market_rating');
 

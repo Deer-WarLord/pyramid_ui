@@ -634,7 +634,7 @@ module.exports = Marionette.CompositeView.extend({
 
             $wrapper.find(".sd-chart-list").html(listTemplate);
             this.triggerMethod('fetched');
-            this.triggerMethod("updateDateControls", $wrapper.find(".time-range"), $wrapper.find(".time-range input"), this.options);
+            this.triggerMethod("updateDateControls", $wrapper.find(".time-range"), $wrapper.find(".time-range input"), this.options, this.model);
             this.query(groupBy);
             $btnNext.hide();
             $btnSuccess.addClass("hidden");

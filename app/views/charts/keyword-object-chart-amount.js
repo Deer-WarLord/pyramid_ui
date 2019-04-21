@@ -374,7 +374,7 @@ module.exports = Marionette.CompositeView.extend({
             this.ui.dynamicChart = $wrapper.find(".demo-vertical-bar-chart");
             $wrapper.find(".sd-chart-title").html(JSON.parse(this.model.get("key_word__in")).join());
             this.triggerMethod('fetched');
-            this.triggerMethod("updateDateControls", $wrapper.find(".time-range"), $wrapper.find(".time-range input"), this.options);
+            this.triggerMethod("updateDateControls", $wrapper.find(".time-range"), $wrapper.find(".time-range input"), this.options, this.model);
             this.query("key_word");
             $btnSuccess.removeClass("hidden");
             $btnNext.hide();
@@ -434,7 +434,7 @@ module.exports = Marionette.CompositeView.extend({
             this.ui.dynamicChart = $wrapper.find(".demo-vertical-bar-chart");
             $wrapper.find(".sd-chart-title").html(JSON.parse(this.model.get("object__in")).join());
             this.triggerMethod('fetched');
-            this.triggerMethod("updateDateControls", $wrapper.find(".time-range"), $wrapper.find(".time-range input"), this.options);
+            this.triggerMethod("updateDateControls", $wrapper.find(".time-range"), $wrapper.find(".time-range input"), this.options, this.model);
             this.query("object");
             $btnNext.hide();
             $btnSuccess.addClass("hidden");
